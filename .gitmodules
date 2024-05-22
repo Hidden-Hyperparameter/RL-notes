@@ -1,0 +1,3 @@
+[submodule "homework_repo"]
+	path = homework_repo
+	url = https://github.com/berkeleydeeprlcourse/homework_fall2023.git
