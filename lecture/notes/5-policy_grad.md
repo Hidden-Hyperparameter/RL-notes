@@ -73,8 +73,10 @@ Causality关注到了一个不易察觉的问题：我们原来的表达式其�
 按照这个思路，我们直接改写
 
 $$
-\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)
+\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)=\frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
 $$
+
+其中的 $\hat{Q}^{\pi_\theta}_{n,t}$有点类似于Q-function但并不是——它是依赖于路径的，“未来所有reward之和”。
 
 数学上，也可以直接证明这样的causality表达式和原先的表达式在$N\to\infty$时是等价的，因为
 
@@ -88,4 +90,110 @@ $$
 
 除了巨大的variance之外，policy gradient的on-policy特性（见第4讲）也造成了sample efficiency的问题。当然，一般policy gradient都是用在sample efficiency不需要特别考虑的地方，但是我们还是讨论一类特别的方式，把off-policy的思想引入policy gradient。
 
-直观地，
+关键在于采用**Importance Sampling**。假设现在我们有$p_{\pi_{\bar{\theta}}}$这个分布中取样的若干样本，那么我们就可以用importance sampling利用这些样本来估计$p_{\pi_\theta}$分布中某些东西的期望。具体地，我们写出
+
+$$
+\nabla_{\theta}J(\theta)=\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\nabla_{\theta}\log p_{\pi_\theta}(\tau)\sum_t r(s_t,a_t)\right]
+$$
+
+$$
+=\mathbb{E}_{\tau\sim p_{\pi_{\bar{\theta}}}(\tau)}\left[\frac{p_{\pi_\theta}(\tau)}{p_{\pi_{\bar{\theta}}}(\tau)}\nabla_{\theta}\log p_{\pi_\theta}(\tau)\sum_t r(s_t,a_t)\right]
+$$
+
+$$
+=\mathbb{E}_{\tau\sim p_{\pi_{\bar{\theta}}}(\tau)}\left[\prod_{t=1}^T\frac{{\pi_\theta}(a_t|s_t)}{{\pi_{\bar{\theta}}}(a_t|s_t)}
+\left(\sum_{t=1}^T \nabla_{\theta}\log \pi_\theta(a_t|s_t) \right)\left(\sum_{t=1}^T r(s_t,a_t)\right)\right]
+$$
+
+这样，在连续几轮对policy的训练中，我们只需要在一开始对策略$\pi_{\bar{\theta}}$进行一个采样，就可以用于几轮的训练。我们成功把off-policy的思想引入了policy gradient。
+
+接下来，我们展示几个变形。
+
+## With Causality
+
+This is a very demanding calculation. We begin with the old causality expression (without doing important sampling):
+
+$$
+\nabla_\theta J(\theta)=\mathbb{E}_{\tau\sim p_\theta(\tau)}\left[ \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)\right]
+$$
+
+$$
+=\sum_{t=1}^T\sum_{t'=t}^T \mathbb{E}_{\tau\sim p_\theta(\tau)}\left[r(s_{t'},a_{t'}) \nabla_\theta\log \pi_\theta(a_t|s_t) \right]
+$$
+
+$$
+=\sum_{t=1}^T\sum_{t'=t}^T \sum_{s_1,a_1,\cdots,s_T,a_T}p(s_1)\pi_\theta(a_1|s_1)\cdots p(s_T|a_{T-1},s_{T-1})\pi_\theta (a_T|s_T)r(s_{t'},a_{t'}) \nabla_\theta\log \pi_\theta(a_t|s_t)
+$$
+
+（接下来这一步的思想是对概率分布使用causality，但数学上是严格等的）
+
+$$
+=\sum_{t=1}^T\sum_{t'=t}^T \sum_{s_1,a_1,\cdots,s_{t'},a_{t'}}p(s_1)\pi_\theta(a_1|s_1)\cdots p(s_{t'}|a_{{t'}-1},s_{{t'}-1})\pi_\theta (a_{t'}|s_{t'})r(s_{t'},a_{t'}) \nabla_\theta\log \pi_\theta(a_t|s_t)
+$$
+
+$$
+=\sum_{t=1}^T\sum_{t'=t}^T\mathbb{E}_{\tau_{\le t'}\sim p_{\bar{\theta}}(\tau_{\le t'})}\left[\prod_{t''=1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}r(s_{t'},a_{t'})\nabla_{\theta}\log \pi_\theta(a_t|s_t)\right]
+$$
+
+$$
+=\sum_{t=1}^T\sum_{t'=t}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\prod_{t''=1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}r(s_{t'},a_{t'})\nabla_{\theta}\log \pi_\theta(a_t|s_t)\right]
+$$
+
+$$
+=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\nabla_{\theta}\log \pi_\theta(a_t|s_t)\cdot \prod_{t''=1}^{t}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\sum_{t'=t}^T\left(r(s_{t'},a_{t'})\prod_{t''=t+1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\right)\right]
+$$
+
+最后，可以证明，我们可以忽略最后的
+
+$$
+\prod_{t''=t+1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}
+$$
+
+使得算法依然有效。证明会在后面的lecture中提到，届时我会把它移动到这里。
+
+![](./assets/not_implement.png)
+
+最后，causality的表达式可以写成
+
+$$
+\nabla_\theta J(\theta)=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\nabla_{\theta}\log \pi_\theta(a_t|s_t)\cdot \prod_{t''=1}^{t}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\sum_{t'=t}^Tr(s_{t'},a_{t'})\right]
+$$
+
+## With First-order Approximation
+
+接下来，我们进一步丢掉大部分的项，给出
+
+$$
+\nabla_\theta J(\theta)=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\frac{{\pi_\theta}(a_{t}|s_{t})}{{\pi_{\bar{\theta}}}(a_{t}|s_{t})}\nabla_{\theta}\log \pi_\theta(a_t|s_t)\sum_{t'=t}^Tr(s_{t'},a_{t'})\right]
+$$
+
+这称为first-order approximation。而为什么可以作这一步操作，我们会在后面的lecture中提到。
+
+![](./assets/not_implement.png)
+
+# Policy Gradient In Practice
+
+## Fake Loss Function for Autograd
+
+我们先回到vanilla policy gradient的表达式：
+
+$$
+\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)=\frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
+$$
+
+为了避免手动计算梯度，我们可以构造一个没有实际意义的loss，但这个loss的梯度就是$\nabla_\theta J(\theta)$。它可以是
+
+$$
+\tilde{J}(\theta)=\frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
+$$
+
+（注意$\hat{Q}^{\pi_\theta}_{n,t}$和$\theta$无关，只和路径有关）
+
+## Tune the Hyperparameters
+
+- Learning rate: hard to tune, so better use Adam.
+- Batch size: as large as possible, since the variance is large.
+
+# Advanced Policy Gradient Methods
+
+![](./assets/not_implement.png)
