@@ -436,3 +436,4 @@ $$
 
 因此，我们也可以把$\gamma\lambda$整体看作参数：每一项 $r(s_{t'},a_{t'})+\gamma V^{\pi_\theta}_\phi(s_{t'+1})-V^{\pi_\theta}_\phi(s_{t'})$ 代表着这一步是否优秀；而$\gamma\lambda$代表着我们对每一步作出重要性如何随着时间而衰减。
 
+最后，值得一提：GAE是一个比较general的算法，之前的两种方法都可以被视为GAE的特例。具体地，当$\lambda=1$时，可以消去中间项发现GAE advantage成为了state-independent baseline的形式；而当$\lambda=0$时，GAE advantage成为了vanilla actor-critic的形式。
