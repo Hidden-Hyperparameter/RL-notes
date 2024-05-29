@@ -239,19 +239,13 @@ $$
 
 但我们很快发现这多了很多的单采样，variance会很大。解决方法是并行地进行很多个trajectory，然后用这些trajectory的平均来更新。具体实现方法不再介绍。
 
+如果不能并行，那么我们还有另外一种方法，就是下面的**Off-policy Actor-Critic**。
+
 ## Off-policy Actor-Critic
 
-就算不采用online的方法，我们也在想：能否节约一下采样，把这个算法变成off-policy的呢？
+采用**Replay Buffer**的方法也有助于解决前面variance较大的问题。具体地，我们虽然每一次只和环境交互一次，但这并不代表我们只能用这一次的数据来训练。我们可以把这些数据存储在一个Replay Buffer里面，然后每次从这个Buffer里面随机取一些数据来训练。
 
-off-policy的修改一定要涉及旧数据的重新利用。我们采用**Replay Buffer**的方法。首先回顾之前的算法：
-
-1. 利用现在的policy $\pi_\theta$ 取 $N$ 个trajectory；
-2. 用这些数据训练 $V^{\pi_\theta}_{\phi}$；
-3. 计算 $A^{\pi_\theta}(s_t,a_t)=\gamma V_\phi^{\pi_\theta}(s_{t+1})-V_\phi^{\pi_\theta}(s_{t})+r(s_t,a_t)$
-4. 计算 $\nabla_\theta J(\theta)=\frac{1}{N}\sum_{n}\left[\sum_{t=1}^T\nabla_{\theta}\log \pi_\theta(a_t|s_t)A^{\pi_\theta}(s_t,a_t)\right]$
-5. 用这个梯度更新 $\theta$
-
-我们观察第2和第4步的两个训练过程，可以发现其实没有必要必须对$t=1$到$T$依次训练，只要选取足够多的$\{s_t,a_t,s_{t+1},r\}$对就可以了。因此我们可以把这些数据存储在一个Replay Buffer里面，然后每次从这个Buffer里面随机取一些数据来训练。
+因为buffer里面的数据并非全部来自当前policy，所以这个方法也是off-policy的。我们称这种方法为**Off-policy Actor-Critic**。但是引入replay buffer肯定要涉及算法的修改。
 
 > 现在，请你想一想，有哪些地方需要修改？
 

@@ -95,9 +95,41 @@ $$
     1. 根据公式计算$Q$的目标；
     2. 作$S$次梯度下降，最小化拟合误差
 
-**Q Learning Algorithm**
+**Vanilla Q Learning Algorithm**
 
 重复：
 1. 从环境中根据某种policy采样一个$(s,a,s',r)$；
 2. 计算**一个** $[Q^\pi(s,a)]^\star=r(s,a)+\gamma\max_{a'}Q^{\pi}_\phi(s',a')$
 3. 对 $L=([Q^\pi(s,a)]^\star-Q^{\pi}_\phi(s,a))^2$作**一步**梯度下降。
+
+**DQN Algorithm**
+
+```python
+while True:
+    for _ in range(N):
+        InteractWithEnv()
+        for _ in range(K): # usually K=1
+            GetTargetFromBuffer()
+            GradStep()
+    phi_0=phi
+```
+
+# 8-Q Learning
+
+**Double Q-learning**
+
+$$
+Q_\phi(s_t,a_t)\leftarrow r(s_t,a_t)+\gamma Q_{\phi_0}(s_{t+1},\arg \max Q_{\textcolor{red}{\phi}}(s_{t+1},a))
+$$
+
+
+**DDPG Algorithm**
+
+重复：
+1. 从环境中根据某种policy采样一个$(s,a,s',r)$，加入replay buffer $B$；
+2. 从replay buffer取出一个batch(相当于$K=1$)，计算目标 $[Q(s,a)]^\star=r(s,a)+\gamma Q_{\phi_0}(s',\pi_{\theta_0}(s'))$；
+3. 对 $L(\phi)=\sum_{(s,a)}([Q(s,a)]^\star-Q_\phi(s,a))^2$作一步梯度下降；
+4. 对 $L(\theta)=-\sum_s Q_\phi(s,\pi_\theta(s))$做一步梯度下降；
+5. 更新$\phi_0,\theta_0$，可以使用隔$N$次更新一次的方法，也可以使用Polyak平均的方法。
+
+
