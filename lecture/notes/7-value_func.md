@@ -90,7 +90,7 @@ $$
 Q^\pi(s_t,a_t)\leftarrow r(s_t,a_t)+\gamma \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[\max_{a_{t+1}}Q^{\pi}(s_{t+1},a_{t+1})\right]
 $$
 
-这样的更新关系。注意到现在最大值的位置跑到了内部！这样我们不需要和环境多次交互，只需要多跑几次神经网络就可以了。
+这样的更新关系。注意到现在最大值的位置跑到了**内部**！这样我们不需要和环境多次交互，只需要多跑几次神经网络就可以了。
 
 这个方法就是著名的**Q Iteration Algorithm**。当然，代价也是明显的：我们的网络需要输入$s_t,a_t$两个参数，因此拟合的难度也比较高。但考虑到DL的巨大发展已经为人们扫平了大部分的障碍，这个方法完全瑕不掩瑜。
 
@@ -118,18 +118,20 @@ $$
 
 当然，实验给出的最优方式就是像上面的算法描述的那样：对同样的一组数据训练$K$轮，然后作exploration，再重新根据某种policy $\pi$来收集数据，再训练$K$轮，如此循环。
 
-## Q learning
+## Q learning: Introduction
 
 Q learning是Q iteration的online版本。具体地，我们每一次和环境交互一次，立刻用上面Q iteration的方法处理得到的数据，并根据一个策略继续交互。
 
-> **Q Learning Algorithm**
+> **Vanilla Q Learning Algorithm**
 
 重复：
 1. 从环境中根据某种policy采样一个$(s,a,s',r)$；
 2. 计算**一个** $[Q^\pi(s,a)]^\star=r(s,a)+\gamma\max_{a'}Q^{\pi}_\phi(s',a')$
 3. 对 $L=([Q^\pi(s,a)]^\star-Q^{\pi}_\phi(s,a))^2$作**一步**梯度下降。
 
-这些步骤保证了它是一个online的算法。当然，就如之前所说，这里用来第一步采样的“某种policy”并不一定是当前$Q$值分布下的最佳policy；但从另一个角度来看，这个policy多少应该贴近现在的最优policy，这样有利于模型“加强训练”。除此之外，必须注意我们也需要有一个exploration的机制，否则我们可能会陷入一个很差的解。
+其中第二步的“一个”是为了保证它是一个online的算法。而第三步之所以只作一个gradient step，是因为我们的训练数据只有一个（也就是刚采样的那个数据）。
+
+另外值得一提的是第一步采样的policy。就如之前所说，因为off-policy的性质，这里采样的“某种policy”并不一定是当前$Q$值分布下的最佳policy；但从另一个角度来看，直觉上这个policy多少应该贴近现在的最优policy，这样有利于模型“加强训练”。但除此之外，我们必须注意policy需要有一个exploration的机制，否则我们可能会陷入一个很差的解。
 
 这一切都使得**Q learning中的exploration**成为一个非常重要的问题。我们将在之后的某讲讨论这个问题。但在现在，可以根据intuition给出一些介绍：
 
@@ -137,6 +139,35 @@ Q learning是Q iteration的online版本。具体地，我们每一次和环境�
 - **Boltzmann**：$\pi(a|s)=\frac{1}{Z}e^{Q(s,a)/\tau}$。注意这个方法相比于$\epsilon$-greedy的合理性：
     - 如果有两个Q很接近的action，那么它们被选中的概率应该接近；
     - 如果有两个都不是最优，但从Q上能明确分清主次的action，那么它们被选中的概率应该也有一定差距。
+
+# Further on Q learning
+
+*Side Note.* 这里的内容实际上是从第八讲搬迁过来的，使得内容更连贯。
+
+## Issues
+
+如果你仔细观察上面vanilla Q learning的算法，那么很大概率你会觉得这个算法有着巨大的不合理之处。
+
+首先，Q learning是每一次训练的数据都是和环境交互的最新结果（换句话说，在同一条trajectory上面）。这就造成问题了：如果考虑Q learning的连续几步gradient step，那么就会发现，它的训练数据是**相关**的。这会导致Q learning的收敛性变得很难保证。
+
+不仅如此，每一步的gradient step都伴随着一个value的update，这就使得它的训练目标是“移动的”，这也会导致收敛性的问题。
+
+举一个不恰当的例子：比如我们训练MNIST的分类模型，上来给你一张图片label是1；接下来，只让你做一步gradient step，然后立刻把这张图片（比如说）加一点噪声或者扭转一下（强相关性），然后把label改成2。这样要是能收敛，那就是世界奇迹了。
+
+因此，这个简单的版本理论上存在很大的缺陷。我们需要想办法让它work。
+
+## Avoid Correlation
+
+回顾一下第六讲的Online actor-critic algorithm，我们也看到了类似的问题：当时是我们每一次采集一组数据，update value function approximater 和 policy function。
+
+> 1. 用当前的策略$\pi_\theta$走一步，记为$\{s_t,a_t,s_{t+1},r=r(s_t,a_t)\}$；
+> 2. 用一步的数据$\{V_{\phi}^{\pi_\theta}(s_t),V_{\phi}^{\pi_\theta}(s_{t+1}),r\}$训练 $V^{\pi_\theta}_{\phi}$；
+> 3. 计算 $A^{\pi_\theta}(s_t,a_t)=\gamma V_\phi^{\pi_\theta}(s_{t+1})-V_\phi^{\pi_\theta}(s_{t})+r(s_t,a_t)$
+> 4. 计算 $\nabla_\theta J(\theta)=\nabla_{\theta}\log \pi_\theta(a_t|s_t)A^{\pi_\theta}(s_t,a_t)$
+> 5. 用这个梯度更新 $\theta$
+
+避免correlation的最简单思路就是进行并行，比如同时开32个线程跑Q learning，然后update的时候用所有线程数据一起进行。这样就至少保证了这32个数据点是无关的。当然，这样需要进行很多synchronization的操作，实现起来难度较大。
+
 
 # Theoretical Analysis
 
@@ -192,6 +223,6 @@ $$
 L(s,a)=\left(Q^\pi_\phi(s_t,a_t)-r(s_t,a_t)-\gamma \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[\max_{a_{t+1}}\text{SG}\left[Q^{\pi}_\phi(s_{t+1},a_{t+1})\right]\right]\right)^2
 $$
 
-我们会发现它基本上就是一个linear regression的形式。为什么不收敛呢？一定是因为stop gradient把原先的同时优化变为了交替优化。因此，residual gradient考虑去除stop gradient，试着优化这个新的loss。
+我们会发现它基本上就是一个linear regression的形式。为什么不收敛呢？一定是因为stop gradient把原先的同时优化变为了交替优化。因此，residual gradient考虑**去除stop gradient**，直接试着优化这个新的loss。
 
 理论上听起来很吸引人，因为根据linear regression的理论，它一定能收敛；但实际上，它甚至跑得不如不收敛的Q learning。唉，可能你也发现了：理论上的东西，骗骗哥们得了，别把自己也给骗了。
