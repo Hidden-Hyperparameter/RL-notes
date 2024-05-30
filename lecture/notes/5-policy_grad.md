@@ -161,7 +161,7 @@ $$
 
 ## With First-order Approximation
 
-接下来，我们进一步丢掉大部分的项，给出
+接下来，我们进一步丢掉 $t'<t$ 的importance weight项，给出
 
 $$
 \nabla_\theta J(\theta)=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\frac{{\pi_\theta}(a_{t}|s_{t})}{{\pi_{\bar{\theta}}}(a_{t}|s_{t})}\nabla_{\theta}\log \pi_\theta(a_t|s_t)\sum_{t'=t}^Tr(s_{t'},a_{t'})\right]
@@ -170,6 +170,29 @@ $$
 这称为first-order approximation。而为什么可以作这一步操作，我们会在后面的lecture中提到。
 
 ![](./assets/not_implement.png)
+> 注：以下内容来自[jzc](https://github.com/szjzc2018)
+>
+> **一个不错的理解**
+> 
+> 在后面的lecture来临之前，不妨让我们先来理解一下上面丢掉的两项。可以看到，上面的表达式相比于原先最开始的数学上严格的表达，相当于去除了除了$t$时刻之外的所有importance weight。为什么这是合理的呢？
+
+![](./assets/5-1.jpeg)
+
+> 我们考虑这样一张图：假设环境是决定性的，而红色标出的是我们的policy的概率。那么根据两步得到的正确概率，我们policy gradient导致的policy概率分布的梯度就可以用图中的蓝线的表示（这里蓝线越粗代表梯度越大）。比如说，从上到下第二个点的reward就比第一个点对policy的梯度影响更大。
+> 
+> 那么现在我们移去前面（也就是 $t'<t$ 的）importance sampling的项，相当于丧失了第一步的信息（标为灰色，这里假设proposal就是简单的均匀分布，50%概率），也就是训练的数据集中第一步的概率分布完全由proposal $\pi_{\bar{\theta}}$提供。但是即便如此，我们可以发现这个模型也可以学会第二步的正确操作：每一个点处policy的选取还是决定于概率更大的那个的reward。
+>
+> 类似地，前面移除后面的importance weight的影响也只是在于更久远的reward相差了一定的倍数。（原来的时候对于不同的 $t'>t$，$r(s_{t'},a_{t'})$ 有着不同的importance weight，但现在直接是加起来）。只要$t$时刻的importance weight还在，整体的优化方向就大概仍然是对的。
+> 
+> 你可能会argue，这张图片里的情况是因为数字上的巧合（更改这几个概率的数值会使得结论变的不是这样）。但是我**并不是试图论证它是“完全正确的”**；相反，我们却只需要说明这个新的loss是**合理的**：这个新的loss可以理解为**前面和后面都按照importance sampling的方式走，只有第t步按照现有的policy来走**，这样一个**新的**"hybridized policy"。直观上可以想象，优化这个policy也可以带着原来的policy往正确的方向前进。
+
+这里，还透露出一个至深的思想：
+
+> **小贴士**
+> 
+> RL的一个重要观点是，和DL不同，我们没有一个绝对的“目标”的概念。value只是一个proposed的目标，关键还是要我们的模型能够work。
+> 
+> 这就是为什么我们很多时候为了减少计算量可以做一些数学上不完全正确的事情：你可以理解为我们换了一个新的目标（比如上面，改成在这样的一个“hybridized”的policy下面最优化reward），只要这个目标依然合理（不能有明显的情况使得它负优化），并且数学上使得计算更简单，那我们就是稳赚不赔。
 
 # Policy Gradient In Practice
 
