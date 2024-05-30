@@ -143,38 +143,19 @@ $$
 =\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\nabla_{\theta}\log \pi_\theta(a_t|s_t)\cdot \prod_{t''=1}^{t}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\sum_{t'=t}^T\left(r(s_{t'},a_{t'})\prod_{t''=t+1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\right)\right]
 $$
 
-最后，可以证明，我们可以忽略最后的
-
-$$
-\prod_{t''=t+1}^{t'}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}
-$$
-
-使得算法依然有效。证明会在后面的lecture中提到，届时我会把它移动到这里。
-
-![](./assets/not_implement.png)
-
-最后，causality的表达式可以写成
-
-$$
-\nabla_\theta J(\theta)=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\nabla_{\theta}\log \pi_\theta(a_t|s_t)\cdot \prod_{t''=1}^{t}\frac{{\pi_\theta}(a_{t''}|s_{t''})}{{\pi_{\bar{\theta}}}(a_{t''}|s_{t''})}\sum_{t'=t}^Tr(s_{t'},a_{t'})\right]
-$$
-
 ## With First-order Approximation
 
-接下来，我们进一步丢掉 $t'<t$ 的importance weight项，给出
+First-order approximation是指，我们丢掉 $t'\ne t$ 的importance weight项，给出
 
 $$
 \nabla_\theta J(\theta)=\sum_{t=1}^T\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\frac{{\pi_\theta}(a_{t}|s_{t})}{{\pi_{\bar{\theta}}}(a_{t}|s_{t})}\nabla_{\theta}\log \pi_\theta(a_t|s_t)\sum_{t'=t}^Tr(s_{t'},a_{t'})\right]
 $$
 
-这称为first-order approximation。而为什么可以作这一步操作，我们会在后面的lecture中提到。
+乍一看，这毫无道理：为什么我们可以丢掉这么多项？实际上，这一方法更多地来自一个更高的视角。我们会在第9讲进行介绍。不管如何，这样显然减少了巨量的计算量——就算它没有什么道理，如果它work了，人们也想必会十分器重它。
 
-![](./assets/not_implement.png)
-> 注：以下内容来自[jzc](https://github.com/szjzc2018)
->
-> **一个不错的理解**
-> 
-> 在后面的lecture来临之前，不妨让我们先来理解一下上面丢掉的两项。可以看到，上面的表达式相比于原先最开始的数学上严格的表达，相当于去除了除了$t$时刻之外的所有importance weight。为什么这是合理的呢？
+但在接受后面更高级的知识之前，不妨让我们先来从直觉上理解一下上面的表达式的原理。以下内容是来自[jzc](https://github.com/szjzc2018)的一个非常不错的理解
+ 
+> 可以看到，上面的表达式相比于原先最开始的数学上严格的表达，相当于去除了除了$t$时刻之外的所有importance weight。为什么这是合理的呢？
 
 ![](./assets/5-1.jpeg)
 
@@ -217,6 +198,6 @@ $$
 - Learning rate: hard to tune, so better use Adam.
 - Batch size: as large as possible, since the variance is large.
 
-# Advanced Policy Gradient Methods
+# Further Policy Gradients
 
-![](./assets/not_implement.png)
+我们会在第9讲继续介绍有关policy gradient的知识。届时，我们会从另外一个角度理解policy gradient，并对其提出一个重要的改进。

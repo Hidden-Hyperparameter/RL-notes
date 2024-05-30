@@ -378,7 +378,7 @@ $$
 
 因此，我们可以修改$\nabla_\theta J(\theta)$的计算：
 - **取少量的sample计算出第一项**，虽然方差较大但是因为这一项本身相对第二项很小，影响不大；
-- **取大量的sample计算第二项**，因为这一项不再和环境有关，所以可以取很多sample。这就是Control Variates的核心思想。
+- **取大量的sample计算第二项**，因为这一项的计算相比于$\hat{Q}^{\pi_\theta}_{t}$而言只需要$(s_t,a_t)$，不需要后面的轨迹，所以可以取很多sample同时保持计算的高效性。这就是Control Variates的核心思想。
 
 # Hybrid Methods
 
@@ -430,4 +430,4 @@ $$
 
 因此，我们也可以把$\gamma\lambda$整体看作参数：每一项 $r(s_{t'},a_{t'})+\gamma V^{\pi_\theta}_\phi(s_{t'+1})-V^{\pi_\theta}_\phi(s_{t'})$ 代表着这一步是否优秀；而$\gamma\lambda$代表着我们对每一步作出重要性如何随着时间而衰减。
 
-最后，值得一提：GAE是一个比较general的算法，之前的两种方法都可以被视为GAE的特例。具体地，当$\lambda=1$时，可以消去中间项发现GAE advantage成为了state-independent baseline的形式；而当$\lambda=0$时，GAE advantage成为了vanilla actor-critic的形式。
+最后，值得一提：GAE是一个比较general的算法，之前的两种方法都可以被视为GAE的特例。具体地，当$\lambda=1$时，可以消去中间项发现GAE advantage成为了[state-independent baseline](#state-dependent-baselines)的形式；而当$\lambda=0$时，GAE advantage成为了[vanilla actor-critic](#actor-critic-in-practice)的形式。
