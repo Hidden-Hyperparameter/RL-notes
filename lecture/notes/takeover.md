@@ -132,4 +132,75 @@ $$
 4. 对 $L(\theta)=-\sum_s Q_\phi(s,\pi_\theta(s))$做一步梯度下降；
 5. 更新$\phi_0,\theta_0$，可以使用隔$N$次更新一次的方法，也可以使用Polyak平均的方法。
 
+# 9-Advanced Policy Gradients
 
+**Natural Gradients**
+
+$$
+\theta_1\leftarrow \theta_0 + \eta \frac{F^{-1}g}{\sqrt{g^TF^{-1}g}},g=\nabla_\theta J(\theta)
+$$
+
+# 10 Optimal Control & Planning
+
+**Cross Entropy Method**
+
+重复：
+1. 随机采样 $\mathbf{A}_1,\mathbf{A}_2,\cdots,\mathbf{A}_N$（这里$\mathbf{A}=(a_1,\cdots,a_T)$）；
+2. 计算 $J(\mathbf{A}_1),J(\mathbf{A}_2),\cdots,J(\mathbf{A}_N)$；
+3. 保留最好的 $M$ 个数据点，更新 $p(\mathbf{A})$ 使得它更接近这 $M$ 个数据点的分布。一般地，$p(\mathbf{A})$ 取为高斯分布。
+
+**Monte Carlo Tree Search**
+
+```python
+def MCTS(root):
+    while True:
+        # Selection & Expansion
+        node = TreePolicy(root)
+        # Simulation
+        reward = DefaultPolicy(node)
+        # Backpropagation
+        update(node,reward)
+
+def update(node,reward):
+    while True:
+        node.N += 1
+        node.Q += reward
+        if node.parent is None:
+            break
+        node = node.parent
+
+def TreePolicy(expanded):
+    """UCT Tree Policy"""
+    if not root.fully_expanded():
+        return root.expand()
+    else:
+        best_child = argmax([Score(child) for child in root.children])
+        return TreePolicy(best_child)
+
+def Score(node):
+    return node.Q/node.N + C*sqrt(log(node.parent.N)/node.N)
+```
+
+**LQR**
+
+- Backward Pass
+
+1. 初始化：$\mathbf{Q}_T=\dbinom{A_T\quad B_T}{B_T^T\quad C_T},\mathbf{q}_T=\dbinom{x_T}{y_T}$
+2. 对$t=T,T-1,\cdots,1$：
+    1. $a_t=-C_t^{-1}(y_t+B_ts_t)$
+    2. $V_t=A_t-B_t^TC_t^{-1}B_t, \quad v_t=xt-B_t^TC_t^{-1}y_t$
+    3. $\dbinom{A_{t-1}\quad B_{t-1}}{B_{t-1}^T\quad C_{t-1}}\texttt{ += } \mathbf{F}_{T-1}^TV_{t}\mathbf{F}_{T-1}$（对应 $\mathbf{Q}_{t-1}$）； $\dbinom{x_{t-1}}{y_{t-1}}\texttt{ += } (\mathbf{F}_{T-1}^TV_{t}^T+v_{t}^T)\mathbf{F}_{T-1}$ （对应$\mathbf{q}_{t-1}$）
+
+- Forward Pass
+
+对$t=1,2,\cdots,T$:
+
+1. $a_t=-C_t^{-1}(y_t+B_ts_t)$
+2. $s_{t+1}=\mathbf{F_t}\binom{s_t}{a_t}+f_t+f_t$
+
+**iLQR**
+
+重复：
+1. 计算各个偏导数；
+2. 运行LQR的backward pass，得到$a_t$关于$s_t$的线性关系的系数（即前面的$a_t=-C_t^{-1}(y_t+B_ts_t)$）；
+3. 运行LQR的forward pass（可以引入$\alpha$以保证收敛性）。但这一步计算$s_t$的时候，我们**必须采用真实的演化函数$f$**，而不是线性近似。
