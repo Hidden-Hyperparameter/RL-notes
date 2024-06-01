@@ -204,3 +204,29 @@ def Score(node):
 1. 计算各个偏导数；
 2. 运行LQR的backward pass，得到$a_t$关于$s_t$的线性关系的系数（即前面的$a_t=-C_t^{-1}(y_t+B_ts_t)$）；
 3. 运行LQR的forward pass（可以引入$\alpha$以保证收敛性）。但这一步计算$s_t$的时候，我们**必须采用真实的演化函数$f$**，而不是线性近似。
+
+# 11 Model-Based RL
+
+
+**Model-Based RL Algorithm** (a.k.a. Model Predictive Control,MPC)
+
+1. 用某种baseline policy $\pi_0$（比如随机采样）获得一个数据集$D=\{(s,a,s')\}$；
+2. 重复：
+    1. 在$D$上学习一个动力学模型$f(s,a)$，使得$f(s,a)\approx s'$；
+    2. 使用某种planning的方法来更新最优策略$\pi$。一般地，random shooting就足够了；
+    3. 运行当前的最新策略$\pi$ **仅一步**, 收集**一组**数据，加入数据集：$D=D\cup \{(s,a,s')\}$；
+
+**Uncertainty**
+
+核心关系：
+
+$$
+p(s_{t+1}|s_t,a_t)=\mathbb{E}_{\theta\sim p(\theta|D)}[p(s_{t+1}|s_t,a_t;\theta)]
+$$
+
+Algorithm:
+
+1. 对每一个ensemble中的模型$\theta$：
+    1. 对$t=1,2,\cdots,T-1$，**不断用这一个** $\theta$计算$s_{t+1}$；
+    2. 计算$J$。
+2. 计算各个得到的$J$的平均值。
