@@ -12,6 +12,10 @@ $$
 \mathcal{D}= \mathcal{D}\cup \left\{(s_t,a_t^\star=\pi^{\star}(s_t))|t=1,2,\cdots,T\right\}
 $$
 
+# 3-4
+
+![](./assets/not_implement.png)
+
 # 5-Policy Gradient
 
 **Policy Gradient with Causality**
@@ -205,6 +209,13 @@ def Score(node):
 2. 运行LQR的backward pass，得到$a_t$关于$s_t$的线性关系的系数（即前面的$a_t=-C_t^{-1}(y_t+B_ts_t)$）；
 3. 运行LQR的forward pass（可以引入$\alpha$以保证收敛性）。但这一步计算$s_t$的时候，我们**必须采用真实的演化函数$f$**，而不是线性近似。
 
+**Model Predictive Control**
+
+重复:
+
+1. 根据当前的state $s_t$，把它当成第一步，对$\sum_{t'=t}^{t+T_0}c(s_{t'},a_{t'})$运行iLQR，得到最优的一系列action $a_t,a_{t+1},\cdots,a_{t+T_0}$；
+2. 扔掉后面的所有action，保留$a_t$，并和环境进行一步交互。
+
 # 11 Model-Based RL
 
 
@@ -214,7 +225,7 @@ def Score(node):
 2. 重复：
     1. 在$D$上学习一个动力学模型$f(s,a)$，使得$f(s,a)\approx s'$；
     2. 使用某种planning的方法来更新最优策略$\pi$。一般地，random shooting就足够了；
-    3. 运行当前的最新策略$\pi$ **仅一步**, 收集**一组**数据，加入数据集：$D=D\cup \{(s,a,s')\}$；
+    3. 运行当前的最新策略$\pi$ **仅一步**, 收集 **一组（不是一个）** 数据，加入数据集：$D=D\cup \{(s,a,s')\}$；
 
 **Uncertainty**
 
@@ -230,3 +241,79 @@ Algorithm:
     1. 对$t=1,2,\cdots,T-1$，**不断用这一个** $\theta$计算$s_{t+1}$；
     2. 计算$J$。
 2. 计算各个得到的$J$的平均值。
+
+## 12 Model Based Method with Policy
+
+**MBPO Algorithm**
+
+```python
+while True:
+    # sample data
+    if q_net is None: # first epoch, random sample
+        env_data = SampleFromEnv(policy=random)
+    else:
+        env_data = SampleFromEnv(policy=ExplorePolicy(q_net))
+    dynamic_buffer.AddData(env_data)
+    q_buffer.AddData(env_data)
+
+    # train dynamic model
+    dynamic_model.Train(dynamic_buffer.Sample())
+    for _ in range(K):
+        # add additional data to Q learning data buffer
+        start_point = dynamic_buffer.Sample(n)['states'] # n: a hyperparameter, usually = 1
+        path = dynamic_model.GetTrajectories(
+            start=start_point,
+            length=T, 
+            policy=q_net
+        )
+        q_buffer.AddData(path)
+
+        # get Q-learning data
+        train_q_data = q_buffer.Sample()
+        for _ in range(S):
+            q_net.GradStep(train_q_data)
+            q_net.Update()
+```
+
+**Dyna Algorithm**
+
+重复：
+
+1. 运行某种policy（需要exploration）获得一些$(s,a,s',r)$，加入replay buffer $B$；
+2. 用这一组数据更新一步dynamic model；
+3. 用这一组数据更新一次Q function；
+4. 重复$K$次：
+    1. 从buffer中取出一组数据$(s,a)$。
+    2. 从model给出的概率 $p(s'|s,a)$ 中采样 **几个** $s'$，并用期待值再次更新Q function。
+
+**Successor Representation**
+
+$$
+r(h)=\sum_j w_j\phi_j(h)
+$$
+
+$$
+\psi_j (h_t):=\sum_h \phi_j(h)p_{\text{fut}}(h|h_t)
+$$
+
+$$
+Q^\pi(h_t)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (h_t)
+$$
+
+$$
+\psi_j (h_t)=(1-\gamma)\phi_j(h_t)+\gamma\sum_{h'}p_\pi(h'|h_t)\psi_j(h')
+$$
+
+**Algorithm**
+
+1. 收集一系列和环境交互的数据$(s,a,r)$，训练参数矩阵$w$使得$|r(s,a)-\sum_j w_j\phi_j(s,a)|^2$被最小化；
+2. 选定很多很多个policy $\pi_1,\cdots,\pi_k$
+3. 对$i=1,\cdots,k$：
+    1. 根据当前的策略$\pi$，使用上面的递推关系，类似Q-learning地训练$\psi_j$；
+    2. 利用$\psi$和$w$计算$Q(s,a)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (s,a)$。
+4. 选出一个表现超过前面所有policy的policy $\pi^\star$。具体地，令
+
+$$
+\pi^\star(s)=\arg\max_a \max_i \sum_j w^{\pi_i}_j\psi^{\pi_i}_j(s,a) 
+$$
+
