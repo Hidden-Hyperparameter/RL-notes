@@ -1,1 +1,1 @@
-./0-preliminaries.md
+./lecture/notes/0-preliminaries.md
