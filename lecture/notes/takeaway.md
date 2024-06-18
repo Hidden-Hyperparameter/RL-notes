@@ -88,7 +88,7 @@ $$
 **Q Iteration**
 
 $$
-V^\pi(s_t)\leftarrow \max_{a_t}\left\{r(s_t,a_t)+\gamma \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}[V^{\pi}(s_{t+1})]\right\}
+Q^\pi(s_t,a_t)\leftarrow r(s_t,a_t)+\gamma \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[\max_{a_{t+1}}Q^{\pi}(s_{t+1},a_{t+1})\right]
 $$
 
 **Fitting Q Iteration Algorithm**
@@ -242,7 +242,7 @@ Algorithm:
     2. 计算$J$。
 2. 计算各个得到的$J$的平均值。
 
-## 12 Model Based Method with Policy
+# 12 Model Based Method with Policy
 
 **MBPO Algorithm**
 
@@ -315,5 +315,39 @@ $$
 
 $$
 \pi^\star(s)=\arg\max_a \max_i \sum_j w^{\pi_i}_j\psi^{\pi_i}_j(s,a) 
+$$
+
+# 13 Exploration
+
+**UCB**
+
+$$
+r^{+}(s,a)=r(s,a)+B(s)=r(s,a)+C\sqrt{\frac{\log T}{N(s)}}
+$$
+
+**Thompson Sampling**
+
+重复：
+
+1. 从当前的模型$p_\phi(Q)$采样一个$Q$；
+2. 利用$Q$进行最优决策，跑一个rollout；
+3. 用这个rollout的数据更新$p_\phi(Q)$。
+
+**Information Gain**
+
+$$
+q(\theta|\phi)=\prod_i \mathcal{N}(\theta_i|\mu_{\phi,i},\sigma_{\phi,i})
+$$
+
+$$
+\phi = \arg \min_{\phi}\text{KL}\left(q(\theta|\phi)\Bigg|\Bigg|p(h|\theta)\frac{p(\theta)}{p(h)}\right)
+$$
+
+$$
+\text{IG}(s,a,s')\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
+$$
+
+$$
+a=\arg\min_a \frac{\left(Q(s,a^{\star})-Q(s,a)\right)^2}{\mathbb{E}_{s'}[\text{IG}(s,a,s')]}
 $$
 

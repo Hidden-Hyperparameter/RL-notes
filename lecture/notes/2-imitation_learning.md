@@ -5,7 +5,7 @@
 - $a_t$: action at time $t$
 - $s_t$: state at time $t$
 
-The Markov property can be illustrated in the graph below.
+可以用一张图很好地阐述markov property：
 
 ![](./assets/2-1.png)
 

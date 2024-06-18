@@ -1,12 +1,12 @@
 # Policy Gradient Algorithm
 
-The policy gradient algorithm directly optimize the objective
+我们直接优化目标
 
 $$
 J(\theta)=\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\sum_t r(s_t,a_t)\right]
 $$
 
-by taking gradient descent and apply a little math trick:
+我们计算梯度，并使用一个小的数学技巧：
 
 $$
 \nabla_\theta J(\theta)=\nabla_\theta\left[\int p_{\pi_\theta}(\tau)\sum_t r(s_t,a_t)d\tau\right]
@@ -24,13 +24,13 @@ $$
 =\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\left(\sum_t \nabla_\theta\log \pi_\theta(a_t|s_t)\right)\left(\sum_t r(s_t,a_t)\right)\right]
 $$
 
-Of course, in reality, we may sample $N$ trajectories and estimate the gradient by
+当然，在实际上，我们一般通过采样$N$条轨迹来估计梯度：
 
 $$
 \nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \left(\sum_t \nabla_\theta\log \pi_\theta(a_t|s_t)\right)\left(\sum_t r(s_t,a_t)\right)
 $$
 
-This vanilla algorithm is also called the **REINFORCE** algorithm. It has 3 steps (see the 4th lecture, where we have basically the same steps):
+这一算法也叫做**REINFORCE** algorithm。 它包含三步（就像第四讲提到的那样）：
 
 1. Sample $N$ trajectories $\tau_n$ by $\pi_\theta$.
 2. Compute the gradient of $J(\theta)$ approximately
@@ -111,7 +111,7 @@ $$
 
 ## With Causality
 
-This is a very demanding calculation. We begin with the old causality expression (without doing important sampling):
+这个计算有些复杂。我们首先从旧的causality表达式开始（不做importance sampling）：
 
 $$
 \nabla_\theta J(\theta)=\mathbb{E}_{\tau\sim p_\theta(\tau)}\left[ \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)\right]

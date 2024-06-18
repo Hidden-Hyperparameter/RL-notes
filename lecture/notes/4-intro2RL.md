@@ -37,30 +37,31 @@ In **Partially Observed MDP**, observation $o_t$ is included in the system, whic
 
 ## Goal
 
-For a MDP, the **goal** is to maximize **cumulative reward**:
+我们的目标是最大化 **cumulative reward**:
 $$
 \theta^\star=\argmax_\theta \mathbb{E}_{\tau\sim p_\theta(\tau)}\left[\sum_{t=0}^T r(s_t,a_t)\right]
 $$
 
-where $\tau$ denotes the trajectory $(s_0,a_0,s_1,a_1,\ldots)$, and $p_\theta(\tau)$ is the probability of the trajectory if the policy is $\pi_\theta$.
+其中 $\tau$ 代表轨迹 $(s_0,a_0,s_1,a_1,\ldots)$, $p_\theta(\tau)$ 代表在策略 $\pi_\theta$ 下得到该轨迹的概率。
 
-Importantly, we may re-write the goal so that it can be extend to the case when $T=\infty$. (Notice that in the current expression, the probability space of $\tau$ grows to infty as $T\to \infty$, which makes things complex.) Define $p_{\theta}(s_t,a_t)$ to be the probability of having state-action pair $(s_t,a_t)$ at time $t$. （注：参见第二讲**Notation**部分的重要注意事项，$p_\theta$ 对于不同的 $t$ 不是一个分布）
+我们还希望把这一表达式扩展到$T=\infty$。(注意现在的情况中有些问题，因为$T\to \infty$时$\tau$ 的probability space趋于无限大。) 为此，定义 $p_{\theta}(s_t,a_t)$ ，它是在时间$t$获得 $(s_t,a_t)$的概率。 （注：参见第二讲**Notation**部分的重要注意事项，$p_\theta$ 对于不同的 $t$ 不是一个分布）
 
-We have
+我们有
 $$
 p_{\pi_\theta}((s_{t+1},a_{t+1})|(s_t,a_t))=p(s_{t+1}|s_t,a_t){\pi_\theta}(a_{t+1}|s_{t+1})
 $$
 
-So a **re-written form** of the goal is
+因此，可以重写goal为
 $$
 \theta^\star=\argmax_\theta \sum_{t=0}^T\mathbb{E}_{(s,a)\sim p_{\pi_\theta}(s_t,a_t)}\left[ r(s,a)\right]
 $$
 
-Clearly, this form can be extended to the case when $T=\infty$.
+这以表达就很容易扩展到$T\to \infty$的时候了。
+
 
 ## Value Function and Q Function
 
-Value function is a great mathematical tool to help us optimize the goal. First notice that our last form of the goal $J$ can be written as
+Value function是一个很重要的概念。它定义了一个state的价值，即在这个state下，我们可以获得的最大reward。我们可以定义**Value Function**为
 
 $$
 J=\sum_{t=0}^T\mathbb{E}_{(s_t,a_t)\sim p_{\pi_\theta}(s_t,a_t)}\left[ r(s_t,a_t)\right]
@@ -70,7 +71,7 @@ $$
 =\mathbb{E}_{s_0\sim p(s_0)}\left[\mathbb{E}_{a_0\sim \pi_\theta(a_0|s_0)}\left[r(s_0,a_0)+\sum_{t= 1}^T\mathbb{E}_{(s_t,a_t)\sim p_{\pi_\theta}(s_t,a_t|s_0,a_0)}\left[ r(s_t,a_t)\right]\right]\right]
 $$
 
-So we may want to define the well-known **Q-Function** as
+我们也可以从中定义著名的**Q-Function**：
 
 $$
 Q^{\pi_\theta}(s_t,a_t)=r(s_t,a_t)+\sum_{i={t+1}}^T\mathbb{E}_{(s_i,a_i)\sim p_{\pi_\theta}(s_i,a_i|s_{t},a_{t})}\left[ r(s_i,a_i)\right]
@@ -78,47 +79,49 @@ $$
 
 （注意，这里还是一样的问题：如果$T$有限，那么$Q^{\pi_\theta}(\cdot,\cdot)$对于不同的 $t$很可能不是一个函数，但这一点从记号上没有显示出来。可以发现很多RL的记号都存在这种问题，需要自己意会。）
 
-and the **Value Function** as
+和**Value Function**：
 
 $$
 V^{\pi_\theta}(s_t)=\mathbb{E}_{a_{t}\sim \pi_\theta(a_t|s_t)}\left[Q^{\pi_\theta}(s_t,a_t)\right]
 $$
 
-Then the objective becomes
+这样我们的目标就变成了
 
 $$
 J=\mathbb{E}_{s_0\sim p(s_0)}\left[V^{\pi_\theta}(s_0)\right]=\mathbb{E}_{(s_0,a_0)\sim p_{\pi_\theta}(s_0,a_0)}\left[Q^{\pi_\theta}(s_0,a_0)\right]
 $$
 
-Besides the definition, there is also one relation between $Q$ and $V$:
+此外，我们还有一个重要的，联系 $Q$ 和 $V$的关系：
 
 $$
 Q^{\pi_\theta}(s_t,a_t)=r(s_t,a_t)+\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[V^{\pi_\theta}(s_{t+1})\right]
 $$
 
-This makes $Q$ and $V$ solvable by **Dynamic Programming**, which will be discussed afterwards.
+这使得我们可以使用**Dynamic Programming**的方法计算 $Q$ 和 $V$ 。之后，我们会讨论这一方法。
+
 
 ### Planing with Q and V
 
-The most important aspect of $Q,V$ is that they can express the goal, which means that we can optimize policy if we have $Q,V$.
+$Q,V$ 的重要性在于，它们可以很好地表达出我们的goal。换句话说，如果我们有了 $Q,V$，我们就可以优化policy。
 
-For example, if we have $Q^{\pi}(s,a)$, then we can optimize the policy by
+比如说，如果我们有$Q^{\pi}(s,a)$，我们就有一个最好的策略：
 
 $$
 \pi(a^\star,s)\leftarrow 1, a^\star=\argmax_a Q^{\pi}(s,a)
 $$
 
-Besides that, since $V$ is the expectation of $Q$, we know that our policy should select a good $a$ such that $Q(s,a)\ge V(s)$. These intuitions are important, and will be discussed later.
+除此之外，由于$V$是$Q$的期待值，我们也就知道我们的policy应该选择一个好的$a$，使得$Q(s,a)\ge V(s)$。这些直觉是很重要的，之后会讨论。
+
 
 # RL Algorithms Overview
 
-All RL algorithms have the following structure:
+所有的RL算法都遵循这张图的结构：
 
 ![](./assets/4-1.png)
 
-"Generating Samples" is usually easy and not the focus of the algorithm. The key parts is the green and blue boxes: **Reward Evaluation** and **Policy Improvement**.
+"Generating Samples" 通常是比较容易的，因为只需要环境完成。最关键的部分是绿色和蓝色的部分：**Reward Evaluation** 和 **Policy Improvement**。
 
-Some common algorithms and their corresponding methods are listed below:
+下面是一些常见的RL算法：
 
 | Algorithm | Reward Evaluation | Policy Improvement |
 | --- | --- | --- |

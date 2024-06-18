@@ -99,7 +99,7 @@ $$
 
 2. **NAF(Normalized Advantage Functions)**: 我们选取$Q$函数必须为指定的形式：$Q(s,a)=-\frac{1}{2}(a-\mu_\phi(s))M_\phi(s)(a-\mu_\phi(s))+V_\phi(s)$，其中包含了若干神经网络作为参数。这样计算确实可以很快，但是这个方法的问题也比较明显：$Q$只能是$a$的二次函数！这样的限制太大了。
 
-3. Learn an approximate maximizer: 我们在训练$Q$的同时还训练另外一个网络$\pi_\theta$，使得$\pi_\theta(s)\approx \arg\max_a Q(s,a)$。训练方法也很直接：对$\theta$最大化$Q(s,\pi_\theta(a))$即可。可以发现这个方法实际上是最好的。同时，我们还能看到，我们似乎又再一次引入了policy $\pi$！这一方法也被称为“deterministic policy gradient method”。
+3. Learn an approximate maximizer: 我们在训练$Q$的同时还训练另外一个网络$\pi_\theta$，使得$\pi_\theta(s)\approx \arg\max_a Q(s,a)$。训练方法也很直接：对$\theta$最大化$Q(s,\pi_\theta(a))$即可。可以发现这个方法实际上是最好的。同时，我们还能看到，我们似乎又再一次引入了policy $\pi$！这一方法也被称为“deterministic actor critic method”。
 
 使用上面的方法3,人们得到了著名的**DDPG Algorithm**：
 
@@ -111,6 +111,8 @@ $$
 3. 对 $L(\phi)=\sum_{(s,a)}([Q(s,a)]^\star-Q_\phi(s,a))^2$作一步梯度下降；
 4. 对 $L(\theta)=-\sum_s Q_\phi(s,\pi_\theta(s))$做一步梯度下降；
 5. 更新$\phi_0,\theta_0$，可以使用隔$N$次更新一次的方法，也可以使用Polyak平均的方法。
+
+而类似地，我们还可以学习一个不是deterministic的maximizer。这就是 **SAC(Soft Actor Critic)** 算法。这个算法的核心思想是，我们不再学习一个确定的$\pi$，而是学习一个概率分布$p(a|s)$，使得$Q(s,a)$的期望最大化。我们会发现，此时的问题完全变成了之前的policy gradient问题！只不过这次我们的reward是$Q$值而不是advantage。这样，我们就可以使用policy gradient的updage公式来解决这个问题。这里出于简略，不再详细介绍。可以参考[这篇论文](https://arxiv.org/abs/1801.01290)。
 
 # Implementing Q learning
 
