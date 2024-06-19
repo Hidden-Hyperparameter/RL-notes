@@ -86,17 +86,13 @@ Thompson sampling方法稍微加入了一些model based的成分：我们来根�
 
 ## Method 3: Information Gain
 
-这一方法的思想是：我们要平衡exploitation和exploration。对于exploitation我们已经可以给出一个定量的刻画——reward；但我们并不好说怎么的方法是一个explore。它想到，explore的程度可以用**获得信息的量**来刻画。根据信息理论，定义
+这一方法的思想是：我们要平衡exploitation和exploration。对于exploitation我们已经可以给出一个定量的刻画——reward；但我们并不好说怎么的方法是一个explore。它想到，explore的程度可以用**获得信息的量**来刻画。根据信息理论，定义information gain（也叫做**互信息**）
 
 $$
-\text{IG}(a,r)=\mathcal{H}(\hat{p}({\theta}|h))-\mathcal{H}(\hat{p}(\theta|h,a,r))
+\text{IG}(a)=\mathcal{H}(\hat{p}({\theta}|h))-\mathbb{E}_{r\sim p(\cdot|a)}\left[\mathcal{H}(\hat{p}(\theta|h,a,r))\right]
 $$
 
-$$
-\text{IG}(a)=\mathbb{E}_{r\sim p(\cdot|a)}\left[\text{IG}(a,r)\right]
-$$
-
-其中$\mathcal{H}$代表分布的熵，而$h$代表所有的历史，$\hat{p}(\theta|h)$和$\hat{p}(\theta|h,a,r)$代表根据历史（后者比前者多一组数据）训练出的belief state分布。最后，我们选取action的方式是，
+其中$\mathcal{H}$代表分布的熵，而$h$代表所有的历史，$\hat{p}(\theta|h)$和$\hat{p}(\theta|h,a,r)$代表根据历史（后者比前者多一组数据）训练出的belief state分布。这一表达式的代表了选择action $a$之后增加的信息量（减少的不确定性）。最后，我们选取action的方式是，
 
 $$
 a=\arg\min_a \frac{\left(r(a^{\star})-\mathbb{E}_{r\sim p(\cdot|a)}[r]\right)^2}{\text{IG}(a)}
@@ -226,10 +222,22 @@ $$
 
 具体的实现中可以采用不同的目标，因为我们的目标函数并不重要，重要的是它反映获得这个state $s$之后我们增加了多少信息（这一点体现在$\theta$上）。
 
-我们接下来不管选取哪种目标，而是考虑如何改写之前multi-arm bandit那里的information gain。我们可以发现，近似地，可以用KL divergence来刻画information gain：
+我们接下来不管选取哪种目标，而是考虑如何改写之前multi-arm bandit那里的information gain。我们有
 
 $$
-\text{IG}(s,a,s')\approx \text{KL}(p(\theta|h,s,a,s')||p(\theta|h))
+\text{IG}(a)=\mathbb{E}_{p((s,a,s')|a)}\left[\mathcal{H}({p}({\theta}|h))-\mathcal{H}({p}(\theta|h,s,a,s'))\right]
+$$
+
+可以证明（见下一讲），
+
+$$
+\text{IG}(a)=\mathbb{E}_{p((s,a,s')|a)}\left[\text{KL}(p(\theta|h,s,a,s')||p(\theta|h))\right]
+$$
+
+而为了方便，我们可以使用单采样进行近似：
+
+$$
+\text{IG}(a)\approx \text{KL}(p(\theta|h,s,a,s')||p(\theta|h))
 $$
 
 这里的$h$代表所有的历史数据。但是这里的$\theta$可能很复杂，甚至可能是神经网络的参数。因此，我们需要再次使用Bayesian方法，训练的不是一个确定的网络，而是一个分布。而这个分布就是把每一个参数变成从一个高斯分布取样，均值和方差都是另外的可训练参数，记为$\phi$。换句话说，贝叶斯网络的目标是
@@ -259,7 +267,7 @@ $$
 有了这样的工具，我们就可以成功地给出一个exploration bonus的不错的近似：
 
 $$
-\text{IG}(s,a,s')\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
+\text{IG}(a)\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
 $$
 
 其中$\phi'$代表在加入$(s,a,s')$这一组数据之后的新的参数。使用这个exploration bonus，再使用前面multi-arm bandit中的选择$a$的策略，我们就可以成功地实现一个比较好的exploration。

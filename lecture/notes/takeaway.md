@@ -344,10 +344,37 @@ $$
 $$
 
 $$
-\text{IG}(s,a,s')\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
+\text{IG}(a)\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
 $$
 
 $$
-a=\arg\min_a \frac{\left(Q(s,a^{\star})-Q(s,a)\right)^2}{\mathbb{E}_{s'}[\text{IG}(s,a,s')]}
+a=\arg\min_a \frac{\left(Q(s,a^{\star})-Q(s,a)\right)^2}{\text{IG}(a)}
 $$
 
+# 14 Exploration(2)
+
+**Imagining Goals**
+
+1. 在latent space随机采样作为目标：$z_g\sim p(z)$，然后通过decoder生成目标state：$x_g\sim p_\theta(x_g|z_g)$；
+2. 按照现有的policy $\pi(a|x,x_g)$来收集rollout，得到最终的state $\bar{x}$（最终理想上，我们希望$\bar{x}=x_g$）；
+3. 利用现在的数据训练$\pi$；
+4. 把$\bar{x}$加入数据集，用weighted MLE来训练VAE（$\log p_\theta(\bar{x})\to p_\theta(\bar{x})^\alpha \cdot \log p_\theta(\bar{x})$）
+
+等效目标：
+
+$$
+J=\mathcal{H}(\tilde{p}(g))-\mathcal{H}(\tilde{p}(g|\bar{x}))
+$$
+
+**State Marginal Matching**
+
+1. 重复
+    1. 根据$\tilde{r}(s)=\log p^{\star}(s)-\log p_\pi(s)$来训练$\pi$；
+    2. 根据**历史上所有的轨迹数据**来update $p_\pi(s)$。
+2. **不返回最后的$\pi$，而是返回历史上所有$\pi$的平均**。
+
+**Exploration by Skills**
+
+$$
+J=\sum_z \mathbb{E}_{s\sim \pi(s|z)}[\log p_D(z|s)]
+$$

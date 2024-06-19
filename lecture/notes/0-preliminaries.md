@@ -4,7 +4,7 @@
 
 笔记文件可以在[这里](./lecture/notes)找到
 
-本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./takeaway.md)总结了所有讲的要点，类似于一个的“cheatsteet”。
+本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个的“cheatsteet”。
 
 # Preliminaries
 
