@@ -18,18 +18,18 @@ Offline RL有什么用？除了前面说到的，可以共用数据之外，在�
 
 一些常见的错误：
 
-1. Offline RL和Imitation Learning是一样的？
-    - 答：不是。比如上面的例子，Imitation Learning在理想的情况下学会的是人们平均的开车能力，而我们应该期待好的Offline RL学到更好的开车能力。
+1. Q: Offline RL和Imitation Learning是一样的？
+    - A：不是。比如上面的例子，Imitation Learning在理想的情况下学会的是人们平均的开车能力，而我们应该期待好的Offline RL学到更好的开车能力。
 
-2. Offline RL是不是相当于提取出数据集中价值大的部分，然后做Imitation Learning？
-    - 答：不完全正确。我们确实希望，Offline RL可以“取其精华”，但是这个过程并不是简单的提取。
+2. Q: Offline RL是不是相当于提取出数据集中价值大的部分，然后做Imitation Learning？
+    - A：不完全正确。我们确实希望，Offline RL可以“取其精华”，但是这个过程并不是简单的提取。
 
         一个著名的用Offline RL完成的实验是：在一个环境里有一个抽屉，里面有一个物体，agent需要打开抽屉，拿出物体。训练数据里面虽然有打开抽屉的轨迹和拿出物体的轨迹，但不存在任何一个完整的，既包含打开抽屉又包含拿出物体的轨迹。但是，Offline RL可以学会把这两部分的数据结合起来，完成这个完整的动作。
 
         这一现象也叫做“**Stitching**”，是好的Offline RL算法的一个重要特点。
     
-3. 听你说的这么好，那Offline Learning是不是在给任意的数据集的情况下都可以学到很好的policy？
-    - 答：不是。Offline RL的实际目的并不可能是学习**optimal ploicy**，而只能是**在给定数据集的基础上尽可能学习达到最好的效果**。很容易想像，如果数据集特别烂，那神仙来了也没有办法。但实际上对于正常的数据集，我们都希望Offline RL可以学到很好的policy。
+3. Q: 听你说的这么动人，那Offline Learning是不是在给任意的数据集的情况下都可以学到很好的policy？
+    - A：不是。Offline RL的实际目的并不可能是学习**optimal policy**，而只能是**在给定数据集的基础上尽可能学习达到最好的效果**。很容易想像，如果数据集特别烂，那神仙来了也没有办法，更别提optimal policy了。但实际上对于正常的数据集，我们都希望Offline RL可以学到很好的policy。
 
 ## Important Issue: Distribution Shift
 
@@ -57,7 +57,7 @@ $$
 L=\mathbb{E}_{x\sim D}\left[(f(x)-y)^2\right]
 $$
 
-因此，模型好说的是平均好，而非每个都很好，更不是对任意$x\sim R^n$都好。因此，只要有意地搞一个$x$，很容易“攻破”这一模型。更进一步地，我们甚至不需要使用梯度的方法，只要我们选取一个极端的数值，比如
+因此，模型好说的是平均好，**而非每个都很好，更不是对任意$x\sim R^n$都好**。因此，只要有意地搞一个$x$，很容易“攻破”这一模型。更进一步地，我们甚至不需要使用梯度的方法，只要我们选取一个极端的数值，比如
 
 $$
 x_0=\arg\max f(x)
@@ -71,19 +71,23 @@ $$
 L=\mathbb{E}_{s,a\sim \pi_\beta(s,a)}\left[\left(Q(s,a)-\left(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi(a'|s')}[Q(s',a')]\right)\right)^2\right]
 $$
 
-但是，$\pi$的选取恰恰是
+可以料想，如果$\pi_\beta\approx \pi$，那么就相当于之前说的，在一个分布上训练，并在同样的分布上选取测试数据（在这里，“测试数据”实际上指的是下一轮Q backup的target，因此$\pi_\beta$相当于“训练集”，$\pi$相当于“测试集”）。也就是说，对于$\pi_\beta\approx \pi$的情况，或者之前虽然off-policy但仍然online的情况，问题都不大。
+
+但是现在$\pi_\beta$固定不动，而$\pi$的选取恰恰是
 
 $$
 \pi = \arg\max_{\pi}\mathbb{E}_{a'\sim \pi(a'|s')}[Q(s',a')]
 $$
 
-这就好比是前面说的argmax攻击，会导致我们的模型不准确，或者几乎肯定比真值大很多。因此，几轮迭代下，Q value就会越来越大。
+这就好比是前面说的argmax攻击，会导致我们的模型不准确，或者几乎肯定比真值大很多！因此，几轮迭代下，Q value就会越来越大。
 
-> Q：这不就是之前Q learning中也遇到的问题吗？我们不是可以用double Q learning解决吗？
+> Q：等等，你别蒙我，这不就是之前Q learning中也遇到的问题吗？我们不是可以用double Q learning解决吗？
 >
-> A: 并不是那样简单。如果使用Double Q learning，确实可以减轻这一问题，但并不能完全解决。关键的问题还是之前说的：在开始$Q$一无所知的时候，$\pi$很可能会倾向于作出非常逆天的action，而这又会连带地进一步导致Q的计算更加错误，因为唯一一个环境相关的$r(s,a)$只有$(s,a)\sim \pi_\beta$的数据，因此难以纠正在奇怪的$(s,a)$对上的错误。这样，Q总是偏大，而且偏离真值越来越远。
+> A: 不。这和前面online Q learning遇到的问题虽然相似，但原理上并不相同。原来的那个问题只是针对argmax本身；而现在的问题相当于在原来argmax问题的基础上进一步加剧。
 >
-> 比如说，开始的时候处于随机性，在直路上走的Q值在action为左转的时候最大。那么第一轮训练的时候，$\pi$倾向于左转；而这就可能会导致任何可能走到直路上的$(s,a)$对都有很大的Q值。这样下去几轮就完全乱套了。
+> 原来的偏大对应着是正常训练一个神经网络（在同样的分布上面训练和测试），神经网络不可避免存在误差，而argmax定向地放大了这个误差；而现在的偏大对应着是在一个分布上训练，在另一个分布上测试，神经网络的误差就会比之前大得多，argmax之后的误差也就会比之前大得多。
+>
+> 因此，现在虽然使用double Q learning可以缓解这一问题，但并不能完全解决根本性的，由于两个分布不一致所造成的误差。为了解决这两个分布不同的distribution shift问题，我们必须使用一些新的方法。
 
 # Importance Sampling in Offline RL
 
@@ -118,11 +122,11 @@ $$
 
 相比于第一个因子，第二个因子对梯度爆炸的问题贡献还算小，因为只要$\gamma$略小，就可以避免梯度的爆炸。但是第一个因子就没办法了。回想一下，原来的时候，我们宣称第一个因子可以扔掉：但这是因为当时对于off-policy方法，$p_{\pi_\theta}$和$p_{\pi_\beta}$虽然不同但也比较接近。而现在，没有任何道理二者是接近的，因为$\pi_\beta$是采集数据的那个人随便选的。
 
-因此，**在offline的场景中，我们不再能去除连乘积的影响**。实际上，理论上证明，要避免这个连乘积必须使用value-based method（这是我们在下一大节讨论的问题）。
+因此，**在offline的场景中，我们不再能去除连乘积的影响**。实际上，理论上证明，要避免这个连乘积必须使用value-based method。
 
 但即使有连乘积，我们也可以通过某些办法来避免之前所说的梯度爆炸问题。下面就介绍两种这样的方法。
 
-为了简单起见，我们只考虑OPE(Offline Policy Estimation)问题，也就是给定一个policy $\pi$，Offline地（即只利用用$\pi_\beta$采样出的数据）给出
+为了简单起见，我们只考虑 **OPE(Offline Policy Evaluation)** 问题，也就是给定一个policy $\pi$，Offline地（即只利用用$\pi_\beta$采样出的数据）给出
 
 $$
 V^{\pi}(s_0)=\mathbb{E}_{\tau\sim p_{\pi}(\tau|s_0)}\left[\sum_{t=0}^{T}\gamma^t r(s_t,a_t)\right]
@@ -186,36 +190,93 @@ $$
 
 # Offline RL: Old Methods
 
-我们在这一节介绍一些早期的Offline RL方法，它们虽然在实际中不太常用，但是对于理解Offline RL的概念还是很有帮助的。在这些早期方法中，没有神经网络，一切都是通过线性回归的方式进行近似。值得一提地，在以线性回归为基础的Offline RL研究中，distribution shift问题并不是很突出。但这种方法也注定无法应用到如今的复杂环境中，而且更是没有解决distribution shift的问题。
+我们在这一节介绍一些早期的Offline RL方法，它们虽然在实际中不太常用，但是对于理解Offline RL的概念还是很有帮助的。在这些早期方法中，没有神经网络，一切都是通过**线性回归**的方式进行近似。
+
+值得一提地，在以线性回归为基础的Offline RL研究中，distribution shift问题并不是很突出。但这种方法也注定无法应用到如今的复杂环境中，而且更是没有解决distribution shift的问题。
+
+## Linear Model
 
 我们把总共的 $|S|\times |A|$ 个(state,action) pair通过某种专家知识encode到一个$K$维向量中。这个固定的$(|S|\cdot|A|)\times K$矩阵称为feature matrix，记为$\Phi$。然后，我们以后不再研究每个state或action本身，只研究这个向量。我们需要：
 
 - **reward model**：给定一个$K$维向量，用一个线性函数(对应的矩阵为$w_r$)输出reward。这一过程希望 $\text{OneHot}(s,a)\Phi w_r\approx r(s,a)$。
 - **transition model**：给定一个$K$维向量，用一个线性函数(对应的矩阵为$P_\phi$)输出下一个state的向量。假设在(state,action)对上面的transition是$P^\pi$（注意，这和policy有关），那么我们希望 $\text{OneHot}(s,a)\Phi P_\phi\approx  \text{OneHot}(s,a) P^\pi\Phi$，也就是$\Phi P_{\phi}=P^{\pi}\Phi$。
-- **value model**：给定一个$K$维向量，(对应的矩阵为$w_V$)输出value function。注意因为我们一开始不知道value function，所以这一过程并不是简单的线性回归，而是需要求解递推。这一过程希望 $\text{OneHot}(s,a)\Phi w_V\approx V^\pi(s,a)$。
+- **(Q) value model**：给定一个$K$维向量，(对应的矩阵为$w_V$)输出value function。注意因为我们一开始不知道value function，所以这一过程并不是简单的线性回归，而是需要求解递推。这一过程希望 $\text{OneHot}(s,a)\Phi w_q\approx Q^\pi(s,a)$。
 
 有了它们，我门就可以做OPE(Offline Policy Evaluation)了。具体地，我们先给出矩阵形式的递推：
 
 $$
-V^{\pi}=r+\gamma P^{\pi}V^{\pi}
+Q^{\pi}=r+\gamma P^{\pi}Q^{\pi}
 $$
 
-并把它转化为
-
-其中，$r$代表把每一个$(s,a)$的reward拼起来的列向量。由此可以立刻解出$V^{\pi}$：
+其中，$r$代表把每一个$(s,a)$的reward拼起来的列向量。虽然我们可以解出
 
 $$
-V^{\pi}= (1-\gamma P^{\pi})^{-1}r
+Q^{\pi}=(1-\gamma P^{\pi})^{-1}r
 $$
 
-而我们结合最优的estimator $P_{\phi}$和$w_r$的表达式：
+但这样的形式对应的计算量比较大，因此我们希望使用feature space将其压缩到比较小的维度。也就是
 
 $$
-P_{\phi}=(\Phi^T\Phi)^{-1}P^{\pi}\Phi,\quad w_r=(\Phi^T\Phi)^{-1}r
+\Phi w_q\approx \Phi w_r+\gamma \Phi P_{\phi} w_q
 $$
 
-就可以得到
+此时，我们就近似地有
 
 $$
-V^{\pi}=(1-\gamma \Phi(\Phi^T\Phi)^{-1}P^{\pi}\Phi)^{-1}\Phi(\Phi^T\Phi)^{-1}r
+w_q\approx (1-\gamma P_{\phi})^{-1}w_r
 $$
+
+再利用线性回归的最优解
+
+$$
+P_{\phi}=(\Phi^T\Phi)^{-1}\Phi^T P^{\pi}\Phi,\quad w_r=(\Phi^T\Phi)^{-1}\Phi^T r
+$$
+
+代入，消去引入的中间变量$P_{\phi}$和$w_r$，就有
+
+$$
+w_q\approx (1-\gamma (\Phi^T\Phi)^{-1}\Phi^T P^{\pi}\Phi)^{-1}(\Phi^T\Phi)^{-1}\Phi^T r=(\Phi^T\Phi-\gamma \Phi^T P^{\pi}\Phi)^{-1}\Phi^T r
+$$
+
+这一表达式称为Q function的**least-square temporal difference (LSTD)**。Temporal Distance (TD)指的就是bellman equation的误差项，而least-square就是指我们使用了线性回归的方法。利用这一表达式，我们就可以根据transition和reward的数据（这由环境提供）来估计q value function，从而实现policy的offline evaluation。
+
+当然，如果我们不把action embedd进入feature matrix，那么也可以得到正统的LSTD，也就是估计value function。这一方法相比于上面我们介绍的基于Q function的方法有许多缺陷，我们就不详细展开了。之后我们只考虑这种基于Q function的方法。
+
+## Case of Infinite State-Action Space
+
+我们上面的方法基于把一切的(state,action) pair通过一个feature matrix映射到一个有限维的向量空间中。如果我们的state和action是连续的，那么这一方法就不再适用。但稍微做一修改即可：我们的$\Phi$不再是对于每一个可能的(state,action)给出一个向量，而是对**数据集中的**(state,action)给出向量。
+
+接下来，对于别的方面，我们只需要再做一些很小的修改即可。不妨假设我们只需要对数据集内部的$s$（或者$(s,a)$）计算value（对于数据集外部的$s$，我们确实无法保证任何东西），那么我们就还可以使用前面得到的
+
+$$
+w_q=(\Phi^T\Phi-\gamma \Phi^T P^{\pi}\Phi)^{-1}\Phi^T r
+$$
+
+进行计算。但略需要注意的是，我们并不能得到真正的transition matrix $P^{\pi}$，而只能得到在数据集中的transition matrix。不过这也容易解决，注意到
+
+$$
+(P^{\pi}\Phi)(s,a)=\sum_{s',a'}P^{\pi}(s',a'|s,a)\cdot \Phi(s',a')\approx \mathbb{E}_{s',a'\sim P^{\pi}(\cdot|s,a)}[ \Phi(s',a')]
+$$
+
+因此，我们可以通过单采样来估计这一表达式，也就是说，对于数据集的一组$(s,a,s')$，可以近似地有
+
+$$
+(P^{\pi}\Phi)(s,a)\approx \Phi(s',a')
+$$
+
+其中，$a'$应该从policy $\pi$中采样。这样我们就可以完全按照$w_q$的表达式进行计算，唯一的误差来自于采样。
+
+> 这里可能的一个误解：$\Phi$不是一个“字典”，记录大量(state,action)对应的feature；而是说，$\Phi(s,a)$对于任意的$(s,a)$都是可以直接计算的，因为feature是专家知识或者一个pretrain好的神经网络给出的。只不过，在推导中，为了避免$\Phi$是无穷维这一困难，我们只取数据集中的feature作为$\Phi$。
+>
+> 因此，虽然从$\pi$中采样得到的$a'$不一定使得$(s',a')$落入offline training的数据集中，但我们依然可以计算$\Phi(s',a')$。
+
+更进一步地，我们既然可以完成policy的评估，我们也就很容易进行offline policy improvement。这样的方法称为LSPI(Least Square Policy Iteration)。其方法为：
+
+> **LSPI Algorithm**
+
+重复：
+
+1. 利用当前的policy和固定不动的数据集计算 $w_q=(\Phi^T\Phi-\gamma \Phi^T \Phi')^{-1}\Phi^T r$，其中$\Phi'$的构造方式是：如果$\Phi$的某一行对应着$(s,a)$的feature，那么$\Phi'$的那一行就对应着$(s',a')$的feature。（每次第二步更换$\pi$之后，都要重新计算一次$\Phi'$。）
+2. 利用$w_q$，更新：$\pi(s)\leftarrow \arg\max_a [\Phi(s,a)w_Q]$
+
+这就介绍完了早期的Offline RL方法。当然，还是如前面所说，它们无法从根本上解决distribution shift的问题。如何解决这一问题，我们将在下一节讨论。

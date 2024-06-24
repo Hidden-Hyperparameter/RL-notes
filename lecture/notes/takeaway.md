@@ -378,3 +378,12 @@ $$
 $$
 J=\sum_z \mathbb{E}_{s\sim \pi(s|z)}[\log p_D(z|s)]
 $$
+
+# 15 Offline RL (1)
+
+**LSPI Algorithm**
+
+重复：
+
+1. 利用当前的policy和固定不动的数据集计算 $w_q=(\Phi^T\Phi-\gamma \Phi^T \Phi')^{-1}\Phi^T r$，其中$\Phi'$的构造方式是：如果$\Phi$的某一行对应着$(s,a)$的feature，那么$\Phi'$的那一行就对应着$(s',a')$的feature。（每次第二步更换$\pi$之后，都要重新计算一次$\Phi'$。）
+2. 利用$w_q$，更新：$\pi(s)\leftarrow \arg\max_a [\Phi(s,a)w_Q]$
