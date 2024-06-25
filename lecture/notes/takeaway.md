@@ -387,3 +387,45 @@ $$
 
 1. 利用当前的policy和固定不动的数据集计算 $w_q=(\Phi^T\Phi-\gamma \Phi^T \Phi')^{-1}\Phi^T r$，其中$\Phi'$的构造方式是：如果$\Phi$的某一行对应着$(s,a)$的feature，那么$\Phi'$的那一行就对应着$(s',a')$的feature。（每次第二步更换$\pi$之后，都要重新计算一次$\Phi'$。）
 2. 利用$w_q$，更新：$\pi(s)\leftarrow \arg\max_a [\Phi(s,a)w_Q]$
+
+# 16 Offline RL (2)
+
+**AWAC Algorithm**
+
+重复：
+
+1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练$\theta$；
+2. 使用 $L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_{\beta}}\left[(Q_\phi(s,a)-(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi_\theta(\cdot|s')}[Q_\phi(s',a')]))^2\right]$ 来训练$\phi$。
+
+**IQL Algorithm**
+
+1. 重复：
+    1. 使用$L_V(\psi)=\mathbb{E}_{s\sim \pi_\beta}\left[\text{ExpectileLoss}_{\tau,Q_\phi(s,a)(a\sim \pi_\beta)}(V_\psi(s))\right]$来训练$\psi$；
+    2. 使用$L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_\beta}\left[(Q_\phi(s,a)-(r(s,a)+\gamma V_\psi(s')))^2\right]$来训练$\phi$；
+
+2. 最后（在eval时）：
+    1. 使用$L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A_{\phi}(s,a)}{\lambda}\right)\right]$来训练$\theta$。
+
+**CQL Algorithm**
+
+$$
+L_{Q,\text{additional}}=\alpha\cdot\left[\lambda \mathbb{E}_{s\sim D}\left[\log\left(\sum_{a}\exp\left(\frac{Q(s,a)}{\lambda}\right)\right)\right]-\mathbb{E}_{s\sim D,a\sim \pi_\beta(a|s)}[Q(s,a)]\right]
+$$
+
+重复：
+
+1. 使用$L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_{\beta}}\left[(Q_\phi(s,a)-(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi_\theta(\cdot|s')}[Q_\phi(s',a')]))^2\right]+L_{Q,\text{additional}}$来训练$\phi$；
+2. 训练policy：$L_{\pi}(\theta)=-\mathbb{E}_{s\sim \pi_\beta}\left[\mathbb{E}_{a\sim \pi_\theta(\cdot|s)}[Q(s,a)]\right]$
+
+**Uncertainty-based Model-based Offline RL**
+
+
+$$
+\tilde{r}(s,a)=r(s,a)-\lambda u(s,a)
+$$
+
+**COMBO**
+
+$$
+L_{Q,\text{additional}}=\beta\cdot(\mathbb{E}_{s,a\sim \hat{p}}[Q(s,a)]-\mathbb{E}_{s,a\sim \pi_\beta}[Q(s,a)])
+$$
