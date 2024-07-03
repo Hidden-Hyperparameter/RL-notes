@@ -112,7 +112,9 @@ $$
 4. 对 $L(\theta)=-\sum_s Q_\phi(s,\pi_\theta(s))$做一步梯度下降；
 5. 更新$\phi_0,\theta_0$，可以使用隔$N$次更新一次的方法，也可以使用Polyak平均的方法。
 
-而类似地，我们还可以学习一个不是deterministic的maximizer。这就是 **SAC(Soft Actor Critic)** 算法。这个算法的核心思想是，我们不再学习一个确定的$\pi$，而是学习一个概率分布$p(a|s)$，使得$Q(s,a)$的期望最大化。我们会发现，此时的问题完全变成了之前的policy gradient问题！只不过这次我们的reward是$Q$值而不是advantage。这样，我们就可以使用policy gradient的updage公式来解决这个问题。这里出于简略，不再详细介绍。可以参考[这篇论文](https://arxiv.org/abs/1801.01290)。
+而类似地，我们还可以学习一个不是deterministic的maximizer。这就是 **SAC(Soft Actor Critic)** 算法。这个算法的核心思想是，我们不再学习一个确定的$\pi$，而是学习一个概率分布$p(a|s)$，使得$Q(s,a)$的期望最大化。我们会发现，此时的问题完全变成了之前的policy gradient问题！只不过这次我们的reward是$Q$值而不是advantage。这样，我们就可以使用policy gradient的update公式来解决这个问题。这里出于简略，不再详细介绍。可以参考[这篇论文](https://arxiv.org/abs/1801.01290)。
+
+（注：SAC实际上很复杂，还引入了诸如entropy bonus等优化。虽然如此，SAC是现在十分常见的一类处理continous action的方法，基本上是Q learning的标准implement方式，因此十分重要。如果要参考其基本思想，可以参见[hw3](../../homework_repo/hw3/hw3.pdf)）
 
 # Implementing Q learning
 
