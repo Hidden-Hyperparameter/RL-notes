@@ -264,7 +264,7 @@ $$
 \pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)
 $$
 
-这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，转移概率不是$p(s_{t+1}|s_t,a_t,O_{1..T}=1)$，而是$p(s_{t+1}|s_t,a_t)$
+这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，转移概率不是$p(s_{t+1}|s_t,a_t,O_{1..T}=1)$，而是$p(s_{t+1}|s_t,a_t)$。
 
 因此，我们的policy应该重新被选取。很自然地，我们选取它为残酷的事实下的最近似分布：
 
@@ -288,7 +288,7 @@ $$
 
 ### Variational Inference
 
-我们发现，这一问题十分像variational inference！如果记
+我们发现，**这一问题十分像variational inference**！如果记
 
 $$
 z=(s_{1..T},a_{1..T}),\quad x=O_{1..T},\quad q(z|x=1)=p_\pi(z)
@@ -306,7 +306,7 @@ $$
 \text{ELBO}=\log p(x)-\text{KL}\left(q(z|x)||p(z|x)\right)
 $$
 
-而和之前不同的是，现在$\log p(x)$和我们要有化的东西无关，因此我们只需要最大化ELBO。这时，我们就可以用它的第二种表达形式：
+而和之前不同的是，现在$\log p(x)$和我们要优化的东西无关，因此我们**只需要最大化ELBO**。这时，我们就可以用它的第二种表达形式：
 
 $$
 \text{ELBO}= \mathbb{E}_{z\sim q(z|x)}[\log p(x|z)]-\text{KL}(q(z|x)||p(z))
@@ -424,7 +424,7 @@ $$
 
 soft optimality就是这些东西的杂交产物，在一个specific的，目标是“刷分”的传统RL问题中，它的表现不一定比传统的Q-V iteration好；但必须注意，它的设计本身并不是为了解决传统的，使得agent获得最大reward的问题。
 
-但有意思的是，在很多情况下，加入了entropy bonus的方法反而比之前我们介绍的那些Q learning方法更好。我们接下来就来介绍soft optimality的一些应用。
+但有意思的是，即便这么说，在很多情况下，加入了entropy bonus的方法反而比之前我们介绍的那些Q learning方法更好。我们接下来就来介绍soft optimality的一些应用。
 
 # Application of Soft Optimality
 

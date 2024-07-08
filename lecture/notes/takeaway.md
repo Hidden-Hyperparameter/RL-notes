@@ -429,3 +429,36 @@ $$
 $$
 L_{Q,\text{additional}}=\beta\cdot(\mathbb{E}_{s,a\sim \hat{p}}[Q(s,a)]-\mathbb{E}_{s,a\sim \pi_\beta}[Q(s,a)])
 $$
+
+# 19 Soft Optimality
+
+**Objective**
+
+$$
+\pi = \arg \max_{\pi} \mathbb{E}_{\tau\sim p_{\pi}(\tau)}\left[\sum_{t}r(s_t,a_t)-\log \frac{\pi(a_t|s_t)}{p(a_t|s_t)}\right]
+$$
+
+**Theoretical Solution**
+
+$$
+\hat{Q}(s_t,a_t)=r(s_t,a_t)+\gamma \mathbb{E}_{s_{t+1}}[\hat{V}(s_{t+1})]
+$$
+
+$$
+\hat{V}(s_{t+1})=\alpha\cdot \mathbb{E}_{a_{t+1}\sim p(a_{t+1}|s_{t+1})}\left[\exp \left(\frac{\hat{Q}(s_{t+1},a_{t+1})}{\alpha}\right)\right]
+$$
+
+$$
+\pi(a_t|s_t)=\frac{\exp \left(\frac{\hat{Q}(s_t,a_t)}{\alpha }\right)}{\exp \left(\frac{\hat{V}(s_t)}{\alpha }\right)}p(a_t|s_t)
+$$
+
+**SAC algorithm**
+
+重复：
+
+1. 更新 Q function: $Q(s,a)\leftarrow r(s,a)+\gamma[Q(s',a')-\log \pi(a'|s')]$（当然，要采用target network等优化，和之前一样，不再赘述）；
+2. 使用 REINFORCE 或者 REPARAMETERIZE 来更新policy，objective为 $J=\mathbb{E}_{a\sim \pi(a|s)}[Q(s,a)-\log \pi(a|s)]$。
+    - 如果使用 REINFORCE，那么 fake loss 为$\hat{J}=\mathbb{E}_{a\sim \pi(a|s)}[\log \pi(a|s)Q(s,a)]+\mathcal{H}(a|s)$（这是对一组数据的梯度）；
+    - 如果使用 REPARAMETERIZE，那么直接计算loss就可以了。
+    - 你可能会疑问，用 REINFORCE 怎么计算熵$\mathcal{H}$的梯度？实际上，也不是不可以，只需要把fake loss设置为$\frac{1}{2}\mathbb{E}_{a\sim \pi(a|s)}[(\log \pi(a|s))^2]$就可以了。当然，这看起来比较奇怪。实际上，REPARAMETERIZE的效果确实也更好。
+3. 根据policy来收集数据。
