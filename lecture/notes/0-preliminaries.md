@@ -2,9 +2,35 @@
 
 本笔记来自Berkeley的课程[CS285](http://rail.eecs.berkeley.edu/deeprlcourse/)。
 
-笔记文件可以在[这里](./lecture/notes)找到
+笔记文件可以在[这里](./lecture/notes)找到（为了最好的阅读体验，建议下载仓库并用VS code阅读）。
 
 本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个的“cheatsteet”。
+
+# Table Of Contents
+
+Takeaway/Cheatsheet: [Here](./lecture/notes/takeaway.md)
+
+0. Preliminaries (just this file)
+1. What is RL (not implemented)
+2. Imitation Learning [Here](./lecture/notes/2-imitation_learning.md)
+3. Pytorch Basics [(Not complete)](./lecture/notes/3-pytorch.md)
+4. Introduction to RL [Here](./lecture/notes/4-intro2RL.md)
+5. Policy Gradients [Here](./lecture/notes/5-policy_grad.md)
+6. Actor Critic Algorithms [Here](./lecture/notes/6-actor-critic.md)
+7. Value Function Methods [Here](./lecture/notes/7-value_func.md)
+8. Q Learning (advanced) [Here](./lecture/notes/8-Q_learning.md)
+9. Advanced Policy Gradients [Here](./lecture/notes/9-advanced_policy_grad.md)
+10. Optimal Control and Planning [Here](./lecture/notes/10-optimal_control_planning.md)
+11. Model-based RL [Here](./lecture/notes/11-model-based.md)
+12. Model-based RL with a Policy [Here](./lecture/notes/12-model-based-with-policy.md)
+13. Exploration (1) [Here](./lecture/notes/13-exploration_1.md)
+14. Exploration (2) [Here](./lecture/notes/14-exploration_2.md)
+15. Offline RL (1) [Here](./lecture/notes/15-offline-RL_1.md)
+16. Offline RL (2) [Here](./lecture/notes/16-offline-RL_2.md)
+17. RL Theory [Here](./lecture/notes/17-RL-theory.md)
+18. Variational AutoEncoder [Here](./lecture/notes/18-vae.md)
+19. Soft Optimality [Here](./lecture/notes/19-soft-optimality.md)
+20. Inverse RL [Here](./lecture/notes/20-IRL.md)
 
 # Preliminaries
 
