@@ -462,3 +462,37 @@ $$
     - 如果使用 REPARAMETERIZE，那么直接计算loss就可以了。
     - 你可能会疑问，用 REINFORCE 怎么计算熵$\mathcal{H}$的梯度？实际上，也不是不可以，只需要把fake loss设置为$\frac{1}{2}\mathbb{E}_{a\sim \pi(a|s)}[(\log \pi(a|s))^2]$就可以了。当然，这看起来比较奇怪。实际上，REPARAMETERIZE的效果确实也更好。
 3. 根据policy来收集数据。
+
+# 20 Inverse Reinforcement Learning
+
+**MaxEnt IRL (sampling version)**
+
+初始化$\pi_\psi$为随机策略；
+
+1. 在当前的$\psi$下，使用soft optimality的目标训练$\pi_\psi$几步；
+2. 用上面contrastive learning的公式，通过从$\pi_\psi$中采样来计算梯度；
+3. 用梯度更新$\psi$。
+
+$$
+\nabla_{\psi}J=\mathbb{E}_{\tau\sim \pi^\star}\left[\sum_{t}\nabla r_\psi(s_t,a_t)\right]-\mathbb{E}_{\tau\sim \pi_\psi}\left[\sum_{t}\nabla r_\psi(s_t,a_t)\right]
+$$
+
+Importance weighted modification:
+
+$$
+\nabla_{\psi}J\approx \mathbb{E}_{\tau\sim \pi^\star}\left[\sum_{t}\nabla r_\psi(s_t,a_t)\right]- \frac{1}{\sum_{i=1}^N w(\tau_i)}\sum_{i=1}^N w(\tau_i)\nabla r_\psi(s_t,a_t)
+$$
+
+$$
+w(\tau)=\frac{1}{p(O_{1..T})}\frac{\exp \sum_t r(s_t,a_t)}{\pi(a_1|s_1)\cdots\pi(a_T|s_T)}
+$$
+
+**Adversarial IRL**
+
+$$
+D_\psi(\tau;\pi)=\frac{\frac{1}{Z_\psi}\exp \sum_t r_\psi(s_t,a_t)}{\frac{1}{Z_\psi}\exp \sum_t r_\psi(s_t,a_t) + \prod_t \pi(a_t|s_t)}
+$$
+
+$$
+J = \min_{\pi}\max_\psi \mathbb{E}_{\tau\sim \pi^\star}[\log D_\psi(\tau;\pi)]+\mathbb{E}_{\tau\sim \pi}[\log (1-D_\psi(\tau;\pi))]
+$$
