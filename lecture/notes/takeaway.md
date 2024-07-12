@@ -496,3 +496,16 @@ $$
 $$
 J = \min_{\pi}\max_\psi \mathbb{E}_{\tau\sim \pi^\star}[\log D_\psi(\tau;\pi)]+\mathbb{E}_{\tau\sim \pi}[\log (1-D_\psi(\tau;\pi))]
 $$
+
+# 21 RL and LM
+
+**POMDP**
+- 最优策略可能是随机的
+- memoryless: policy gradient
+- memoryful: value-based, with state model/history states
+
+**DPO**
+
+$$
+J_{\text{DPO}}(\theta)=\mathbb{E}_{(s,a_1\succ a_2)}\left[\log \sigma\left(\beta\cdot\left(\log \frac{\pi_\theta(a_1|s)}{\pi_0(a_1|s)} - \log \frac{\pi_\theta(a_2|s)}{\pi_0(a_2|s)}\right)\right)\right]
+$$
