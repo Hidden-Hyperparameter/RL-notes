@@ -1,15 +1,37 @@
 # Terminology
 
-- $\pi_\theta$
+先来回顾一下[Preliminaries](./0-preliminaries.md#preliminaries)中的内容，介绍一些符号——
+
 - $o_t$: observation at time $t$
 - $a_t$: action at time $t$
 - $s_t$: state at time $t$
+- $\pi_\theta(a_t|o_t)$：policy
 
-可以用一张图很好地阐述markov property：
+什么是observation呢？这就引入了一个话题——我们有时候并不能观察到全部的state。
+
+比如说，在开车的时候，state应该包含其他所有车辆的位置、速度等等。但从车窗上的摄像头拍一张照片，我们显然不能获得全部的信息；相反，给定state，我们可以完全给出这张照片。这样的照片就是**observation**。
+
+在本笔记的绝大部分时候，我们总是可以忽略state和observation之间的差别；但有少数的情况，我们必须要区分它们，到时候会明确地说明。
+
+我们认为state是**完备的**。什么叫做完备？其实就是说，在已知$s_t$的时候，$s_{t-1}$不能提供关于$s_{t+1}$的更多信息。也就是
+
+$$
+s_{t-1}\perp s_{t+1}|s_t
+$$
+
+满足这样的条件后，我们就可以发现，$s_{t+1}$只与$s_t,a_t$有关，而这又只和环境有关（注意和policy无关，因为$a_t$已经给出了）。这可以叫做dynamics，也可以叫做**transition probability**：
+
+$$
+s_{t+1}\sim p(s_{t+1}|s_t,a_t) \qquad (\text{determined by env})
+$$
+
+我们可以发现，在这样的一系列假设后，我们可以构造一个Markov Chain，满足Markov Property。如图所示。
 
 ![](./assets/2-1.png)
 
 # Imitation Learning
+
+我们来介绍我们的第一个RL“算法”——Imitation Learning。
 
 Imitation Learning 的思路很简单：我们找一个专家来label data，构建一个数据集
 $$
@@ -36,25 +58,23 @@ $$
 - $a=\pi^{\star}(s)$: the expert policy gives $a$ when the state is $s$
 - $\pi_\theta$: the policy we are trying to learn
 - $p_{\pi_\theta}(s_t)$: the probability of being at state $s_t$ at time $t$ if we follow $\pi_\theta$. 
-    - **重要提示**: $p_{\pi_\theta}(s_t)$的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。 
+    - **重要提示**: $p_{\pi_\theta}(s_t)$的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。 的确——you are on the road :)
 - Use $|p_1-p_2|$ to denote the total variance distance between $p_1$ and $p_2$: $|p_1-p_2|=\sum_{x}|p_1(x)-p_2(x)|$
 
 ## Distribution Distance
 **Assumptions.**
-(Notice: this assumption is only used to derive this **one** conclusion.)
 
 - $\forall (a,s), \pi_\theta(a\ne \pi^{\star}(s)|s)\le \epsilon$
 
-**Conclusion**: for arbitrary $t$,
+**Conclusion**: 对任意的 $t$,
 
 $$
 \sum_{s_t}|p_{\pi_\theta}(s_t)-p_{\pi^{\star}}(s_t)|\le 2\epsilon t.
 $$
 
 
-**Proof**. In these kind of problems (there is also one in the homework), we prove by **induction**.
+**Proof**. **归纳**在这类问题是很常见的方法。我们试着把$t+1$时刻和$t$时刻的表达式联系起来：
 
-We can associate the relation at time $t+1$ with the relation at time $t$:
 $$
 \left|p_{\pi_\theta}(s_{t+1})-p_{\pi^\star}(s_{t+1})\right|=\left|\sum_{s_t,a_t}p(s_{t+1}|s_t,a_t)\pi_\theta(a_t|s_t)p_{\pi_\theta}(s_t)-\sum_{s_t}p(s_{t+1}|s_t,\pi^\star(s_t))p_{\pi^\star}(s_t)\right|.
 $$
@@ -71,9 +91,10 @@ $$
 =\epsilon+\epsilon \sum_{s_t}p_{\pi_\theta}(s_t)p(s_{t+1}|s_t,\pi^\star(s_t))+\sum_{s_t}p(s_{t+1}|s_t,\pi^\star(s_t))\left|p_{\pi_\theta}(s_t)-p_{\pi^\star}(s_t)\right|.
 $$
 
-Summing up with $s_{t+1}$, we immediately get the conclusion.
+对$s_{t+1}$求和即证。
 
-*Side Note.* Problem 1 of Homework 1 actually gives a similar conclusion given the weakened condition
+*Side Note.* Homework 1 的 Problem 1 实际上给出了一个弱化的条件，依然可以给出同样的结论：
+
 $$
 \mathbb{E}_{s_t\sim p_{\pi^\star}}[\pi_\theta(a_t\ne \pi^{\star}(s_t)|s_t)]\le \epsilon.
 $$
@@ -83,7 +104,7 @@ $$
 **Assumptions.**
 - $\mathbb{E}_{s_t\sim p_{\pi^\star}}[\pi_\theta(a_t\ne \pi^{\star}(s_t)|s_t)]\le \epsilon.$
 
-Define $c_t$ to be the **cost function** given by
+如果我们定义 $c_t$ 是 **cost function**：
 $$
 c_t(s_t,a_t)=\begin{cases}0&,a_t=\pi^{\star}(s_t)\\1&,\text{otherwise}\end{cases}.
 $$
@@ -94,7 +115,7 @@ $$
 S=\sum_{t\le T} E_{s_t\sim p_{\pi_\theta}}[c_t(s_t,a_t)]=\mathcal{O}(\epsilon T^2).
 $$
 
-（直观上说，这是指我们的模型失败的步数是 $\mathcal{O}(T^2)$ 的。虽然这只是一个上界，但 intuitively 它应该是比较准确的。）
+（直观上说，这是指我们的模型**失败的步数**是 $\mathcal{O}(T^2)$ 的。虽然这只是一个上界，但 intuitively 它应该是比较准确的。）
 
 **Proof**. 
 
@@ -106,7 +127,7 @@ $$
 \le \sum_{t\le T} \sum_{s_t}p_{\pi^\star}(s_t)\pi_\theta(a_t\ne \pi^\star(s_t)|s_t)+\sum_{t\le T} \sum_{s_t}|p_{\pi_\theta}(s_t)-p_{\pi^{\star}}(s_t)|c_t(s_t,a_t)
 $$
 
-Now, we use the previous result to get
+使用上一个结果，我们就可以得到
 
 $$
 S\le \sum_{t\le T} \epsilon+\sum_{t\le T} 2\epsilon t = \mathcal{O}(\epsilon T^2).

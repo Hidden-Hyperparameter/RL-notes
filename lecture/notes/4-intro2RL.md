@@ -2,38 +2,41 @@
 
 ## Basic Concepts
 
-A **Markov Chain** is 
+**Markov Chain**：
+
 $$
 \mathcal{M}=\{S,T\}
 $$
 
-where $S$ is a set of states and $T$ is a transition matrix. The transition is given by
+其中，$S$被称为**state space**；$T$被称为**transition matrix**。 我们可以写出稳态的分布：
 $$
 p_{t+1}(s')=\sum_{s\in S}T(s',s)p_t(s)
 $$
 
-which is just a matrix multiplication.
+这就是一个简单的矩阵乘法。
 
-A **Markov Decision Process** is 
+**Markov Decision Process**：
+
 $$
 \mathcal{M}=\{S,A,T,r\}
 $$
 
-where $S$ is the state space, $A$ is the action space, and the $T$ is the transition matrix which states
+其中，$S$是**state space**，$A$是**action space**，$T$是**transition matrix**。我们有
+
 $$
 p_{t+1}(s')=\sum_{s,a}T(s',s,a)p_t(s)p^{(A)}_t(a)
 $$
 
-where $p^{(A)}_t(a)$ is the probability of taking action $a$ at time $t$.
+这里 $p^{(A)}_t(a)$ 代表在时刻 $t$ 来take action $a$ 的概率。
 
 
-$r$ is the **reward function**, which gives a reward
+$r$ 是 **reward function**，对于任意(state,action)对，它给出
+
 $$
 r(s,a)\in \mathbb{R}
 $$
-for any given state-action pair.
 
-In **Partially Observed MDP**, observation $o_t$ is included in the system, which is stochastically determined by $s_t$: a probability distribution $O(o_t|s_t)$.
+在 **Partially Observed MDP (POMDP)** 中，我们还必须引入**observation** $o_t$。但在接下来，我们均不考虑这一情况。
 
 ## Goal
 
@@ -121,7 +124,7 @@ $$
 
 "Generating Samples" 通常是比较容易的，因为只需要环境完成。最关键的部分是绿色和蓝色的部分：**Reward Evaluation** 和 **Policy Improvement**。
 
-下面是一些常见的RL算法：
+下面是一些常见的RL算法：（我们会在接下来的几讲介绍它们）
 
 | Algorithm | Reward Evaluation | Policy Improvement |
 | --- | --- | --- |

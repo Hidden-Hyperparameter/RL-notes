@@ -1,3 +1,5 @@
+# For a full pytorch tutorial, see [notebook](./CS_285_Fa23_PyTorch_Tutorial.ipynb)
+
 # Detach
 
 - `t.detach()` return a tensor which is detached from the computation graph. However, this tensor is a reference to the original tensor `t`.
