@@ -1,10 +1,16 @@
-# Notice
+# For Contributors
+
+本笔记基本由我一个人完成，因此肯定有大量的错误。同时，我只是RL领域的初学者，还未入门，因此对很多算法的个人理解也很可能有偏差。如果你发现了错误，或者有任何建议，欢迎提出issue或者PR！
+
+如果这个仓库逐渐有了公开的性质（而不是只有我自己看），可能会考虑推出一个英文版本。（Not Implemented）
+
+# General
 
 本笔记来自Berkeley的课程[CS285](http://rail.eecs.berkeley.edu/deeprlcourse/)。
 
 笔记文件可以在[这里](./lecture/notes)找到（为了最好的阅读体验，建议下载仓库并用VS code阅读）。
 
-本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个的“cheatsteet”。
+本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个“cheatsheet”。
 
 # Table Of Contents
 

@@ -509,3 +509,36 @@ $$
 $$
 J_{\text{DPO}}(\theta)=\mathbb{E}_{(s,a_1\succ a_2)}\left[\log \sigma\left(\beta\cdot\left(\log \frac{\pi_\theta(a_1|s)}{\pi_0(a_1|s)} - \log \frac{\pi_\theta(a_2|s)}{\pi_0(a_2|s)}\right)\right)\right]
 $$
+
+# 22 Transfer Learning & Meta Learning
+
+**Transfer Learning: Concepts**
+
+- forward transfer learning
+    - domain shift & domain adaptation
+    - difference in dynamics: solution
+    - randomization helps
+- multi-task learning
+    - contextual policies
+    - goal-conditioned policies
+
+**Meta Learning**
+
+$$
+\text{Meta Learner }g_\phi: \text{MDP} \to \text{policy}
+$$
+
+$$
+\phi^\star = \arg\max_\phi J(g_\phi;D_\text{meta}) = \arg\max_\phi \sum_{\text{MDP}\in D_{\text{meta}}}J(g_\phi(\text{MDP});\text{MDP})
+$$
+
+Methods:
+- RNN & Contextual Policies
+- MAML
+- Variational Inference
+
+**MAML**
+
+$$
+\phi \leftarrow \phi + \beta \nabla_\phi J_{\text{meta}}(g_\phi) = \phi +  \beta\nabla_\phi \sum_{\text{MDP}\in D_{\text{meta}}}J(\pi_{\phi + \alpha \nabla_\phi J(\pi_\phi;\text{MDP})};\text{MDP})
+$$
