@@ -280,3 +280,10 @@ $$
 2. 利用$w_q$，更新：$\pi(s)\leftarrow \arg\max_a [\Phi(s,a)w_Q]$
 
 这就介绍完了早期的Offline RL方法。当然，还是如前面所说，它们无法从根本上解决distribution shift的问题。如何解决这一问题，我们将在下一节讨论。
+
+# Reference Papers
+
+1. [Offline Reinforcement Learning: Tutorial, Review, and Perspectives on Open Problems](https://arxiv.org/abs/2005.01643)（对Offline RL的一个全面的介绍）
+2. [Stabilizing Off-Policy Q-Learning via Bootstrapping Error Reduction](https://arxiv.org/abs/1906.00949)（解决distribution shift问题）
+3. [Doubly robust off-policy value evaluation for reinforcement learning](https://arxiv.org/abs/1511.03722)（Doubly Robust Estimator）
+4. [Consistent on-line off-policy evaluation](https://arxiv.org/abs/1702.07121)（Marginalized Importance Sampling）

@@ -431,3 +431,10 @@ $$
 因此，我们也可以把$\gamma\lambda$整体看作参数：每一项 $r(s_{t'},a_{t'})+\gamma V^{\pi_\theta}_\phi(s_{t'+1})-V^{\pi_\theta}_\phi(s_{t'})$ 代表着这一步是否优秀；而$\gamma\lambda$代表着我们对每一步作出重要性如何随着时间而衰减。
 
 最后，值得一提：GAE是一个比较general的算法，之前的两种方法都可以被视为GAE的特例。具体地，当$\lambda=1$时，可以消去中间项发现GAE advantage成为了[state-independent baseline](#state-dependent-baselines)的形式；而当$\lambda=0$时，GAE advantage成为了[vanilla actor-critic](#actor-critic-in-practice)的形式。
+
+# Reference Papers
+
+1. [Bias in Natural Actor-Critic Algorithms](https://proceedings.mlr.press/v32/thomas14.html)（讨论discount的问题）
+2. [Q-Prop: Sample-Efficient Policy Gradient with An Off-Policy Critic](https://arxiv.org/abs/1611.02247)（一个control variates的例子）
+3. [High-Dimensional Continuous Control Using Generalized Advantage Estimation](https://arxiv.org/abs/1506.02438)（GAE算法）
+4. [Asynchronous methods for deep reinforcement learning](https://arxiv.org/abs/1602.01783)（**A3C**算法，一种并行的actor-critic算法）

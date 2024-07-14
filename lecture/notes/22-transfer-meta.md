@@ -259,3 +259,17 @@ $$
 但是，另一方面，从思想上说，它们也没有太大的本质差别。我们已经看到，第一、三方法的差别就是latent variable/hidden state是否为随机化的；而MAML可以理解为第一、三方法的一种特殊情况，用梯度下降代替RNN（这让我想到了[TTT](https://arxiv.org/abs/2407.04620)！请忽略我发电）。
 
 meta-RL的研究最前沿实际上已经迈出了计算机科学的领域。一方面，研究表明，meta-RL可以看到**逻辑推理**等能力emergent的[迹象](https://arxiv.org/abs/1901.08162)，也许代表着某种“智能”的诞生；另一方面，许多研究表明，meta-RL也可以试着解释**人类如何做到学习新的知识、适应新的环境如此迅速**。甚至有一些生物学研究者推测，人的大脑里专门有着用来跑各种meta-learning算法的[区域](https://www.nature.com/articles/s41593-018-0147-8)。也许，未来将在这里被改变。
+
+# Reference Papers
+
+1. [Domain-Adversarial Training of Neural Networks](https://arxiv.org/abs/1505.07818)（Domain Adversarial Training）
+2. [Off-Dynamics Reinforcement Learning: Training for Transfer with Domain Classifiers](https://arxiv.org/abs/2006.13916)（Domain Classifier）
+3. [EPOpt: Learning Robust Neural Network Policies Using Model Ensembles](https://arxiv.org/abs/1610.01283)（Randomization）
+4. [Learning to Achieve Goals](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=6df43f70f383007a946448122b75918e3a9d6682)
+5. [Universal Value Function Approximators](https://proceedings.mlr.press/v37/schaul15.html)（Goal-Conditioned Policies）
+6. [Hindsight Experience Replay](https://arxiv.org/abs/1707.01495)
+7. [Memory-based control with recurrent neural networks](https://arxiv.org/abs/1512.04455)（RNN for Meta Learning）
+8. [A Simple Neural Attentive Meta-Learner](https://arxiv.org/abs/1707.03141)（RNN for Meta Learning）
+9. [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks](https://arxiv.org/abs/1703.03400)（MAML）
+10. [Meta-Reinforcement Learning of Structured Exploration Strategies](https://arxiv.org/abs/1802.07245)
+11. [Efficient Off-Policy Meta-Reinforcement learning via Probabilistic Context Variables](https://arxiv.org/abs/1903.08254)（Variational Inference for Meta RL）

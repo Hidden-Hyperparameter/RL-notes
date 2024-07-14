@@ -359,3 +359,13 @@ $$
 $$
 
 那么$C(h)$就没有影响。这一思想被应用到所谓**C-learning**（C for classifier）中。但C-learning的算法[本身](https://arxiv.org/abs/2011.08909)比较复杂（涉及到Goal-conditioned learning），这里就不再展开了。
+
+# Reference Papers
+
+1. [Integrated architectures for learning, planning, and reacting based on approximating dynamic programming](https://www.sciencedirect.com/science/article/abs/pii/B9781558601413500304)（Dyna-style algorithm）
+2. [Continuous deep Q-learning with model-based acceleration](https://arxiv.org/abs/1603.00748)（MBA）
+3. [Model-Based Value Expansion for Efficient Model-Free Reinforcement Learning](https://arxiv.org/abs/1803.00101)（MBVE）
+4. [When to trust your model: Model-based policy optimization](https://arxiv.org/abs/1906.08253)（MBPO）
+5. [Improving Generalisation for Temporal Difference Learning: The Successor Representation](https://www.gatsby.ucl.ac.uk/~dayan/papers/d93b.pdf)（Successor Representations）
+6. [Successor Features for Transfer in Reinforcement Learning](https://arxiv.org/abs/1606.05312)（Successor Features）
+7. [C-Learning: Learning to Achieve Goals via Recursive Classification](https://arxiv.org/abs/2011.08909)（C-learning）

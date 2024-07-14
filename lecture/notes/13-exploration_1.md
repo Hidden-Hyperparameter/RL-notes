@@ -206,7 +206,7 @@ $$
 2. 利用$Q$进行最优决策，跑一个rollout；
 3. 用这个rollout的数据更新$p_\phi(Q)$。
 
-我们如何构造一个函数$Q$的分布呢？最自然的方法就是还是采用ensemble的方法，我们训练$N$个网络$Q_1,\cdots,Q_N$，然后随机从中采样一个。更进一步，我们可以保持前面的提取特征的网络不变，只是加上$N$个 projection head。这样，我们就可以在不增加太多参数的情况下实现ensemble。
+我们如何构造一个函数$Q$的分布呢？最自然的方法就是还是采用ensemble（或者叫作**Bootstrapped**）方法，我们训练$N$个网络$Q_1,\cdots,Q_N$，然后随机从中采样一个。更进一步，我们可以保持前面的提取特征的网络不变，只是加上$N$个 projection head。这样，我们就可以在不增加太多参数的情况下实现ensemble。
 
 你可能会感到奇怪，这个方法看起来就是在Q learning的基础上增加了一个ensemble。但这实际上是关键的：还记得原先的$\epsilon$-greedy策略，它的exploration通常是乏力的，因为每一步的explore都相当于是随机游走。但现在我们的explore相当于是更加强大的。
 
@@ -279,3 +279,14 @@ $$
 除了上面的三种方法之外，还有一些其他的方法。出于篇幅的考虑，我们就不一一介绍了。
 
 可以看到，无论是前面的哪一种方法，为了计算用于exploration 的bonus，都需要在**每一步**训练一个新的模型。因此，我们也可以看到，为了解决exploration这个困难的问题，我们必定是要付出很大的代价的。
+
+# Reference Papers
+
+1. [Exploration by Random Network Distillation](https://arxiv.org/abs/1810.12894)（RND）
+2. [A Possibility for Implementing Curiosity and Boredom in Model-Building Neural Controllers](https://ieeexplore.ieee.org/document/6294131)
+3. [Incentivizing Exploration in Reinforcement Learning with Deep Predictive Models](https://arxiv.org/abs/1507.00814)
+4. [Deep Exploration via Bootstrapped DQN](https://arxiv.org/abs/1602.04621)（Bootstrapped Method）
+5. [VIME: Variational Information Maximizing Exploration](https://arxiv.org/abs/1605.09674)（VIME）
+6. [Unifying Count-Based Exploration and Intrinsic Motivation](https://arxiv.org/abs/1606.01868)（CTS）
+7. [\#Exploration: A Study of Count-Based Exploration for Deep Reinforcement Learning](https://arxiv.org/abs/1611.04717)
+8. [EX2: Exploration with Exemplar Models for Deep Reinforcement Learning](https://arxiv.org/abs/1703.01260)（Counting with Exemplar Models）

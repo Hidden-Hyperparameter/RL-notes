@@ -6,7 +6,7 @@
 
 笔记文件可以在[这里](./lecture/notes)找到（为了最好的阅读体验，建议下载仓库并用VS code阅读）。
 
-本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个“cheatsheet”。
+本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](./lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个“cheatsheet”。在每一讲的最后，可能会有一个"Reference Papers"板块，它介绍了一些在笔记内容之外的，更加advanced的话题的参考来源。每篇论文后有一个简述，但因为我~~事实上都没读过~~不太了解，所以不一定靠谱，仅供参考。
 
 此外，如果有些笔记引用了作业的内容，你可以在[这里](../../homework_repo/)找到。这就是CS285这一课程本身的作业。
 

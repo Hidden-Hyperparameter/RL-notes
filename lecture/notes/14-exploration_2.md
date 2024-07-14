@@ -156,3 +156,11 @@ I=\mathcal{H}(p(z))-\mathcal{H}(p(z|s))
 $$
 
 这也和之前的直觉相符。
+
+# Reference Papers
+
+1. [Visual Reinforcement Learning with Imagined Goals](https://arxiv.org/abs/1807.04742)（介绍Imagining Goals）
+2. [Skew-Fit: State-Covering Self-Supervised Reinforcement Learning](https://arxiv.org/abs/1906.05274)（介绍Skew-Fit）
+3. [Efficient Exploration via State Marginal Matching](https://arxiv.org/abs/1806.04640)（介绍SMM）
+4. [Provably Efficient Maximum Entropy Exploration](https://arxiv.org/abs/1812.02690)（variant of SMM）
+5. [Diversity is All You Need](https://arxiv.org/abs/1802.06070)（介绍Skills-conditioned）

@@ -357,3 +357,9 @@ $$
 我们会发现它基本上就是一个linear regression的形式。为什么不收敛呢？一定是因为stop gradient把原先的同时优化变为了交替优化。因此，residual gradient考虑**去除stop gradient**，直接试着优化这个新的loss。
 
 理论上听起来很吸引人，因为根据linear regression的理论，它一定能收敛；但实际上，它甚至跑得不如不收敛的Q learning。唉，可能你也发现了：理论上的东西，骗骗哥们得了，别把自己也给骗了。
+
+# Reference Papers
+
+1. [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor](https://arxiv.org/abs/1801.01290)（十分著名的对Q learning或者actor critic的改进，强烈建议了解）
+2. [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236)（DQN for games）
+3. [Deep reinforcement learning with double Q-learning](https://arxiv.org/abs/1509.06461)（Double Q-learning）

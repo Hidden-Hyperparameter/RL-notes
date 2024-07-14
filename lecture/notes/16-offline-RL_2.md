@@ -271,3 +271,13 @@ Offline RL迄今为止还是一个十分前沿的领域。因此，不同的问�
 - COMBO和Trajectory Transformer的使用一般在model比较简单的时候（比如，humanoid这样的简单的物理环境，trajectory transformer可以十分精确地预测100轮和环境的交互）。
 
 最后再回到之前的问题，我们为什么要研究offline RL？其实，在实际研究中，人们最重视的往往是数据集的重用性。比如，人们研究一种新提出的算法，在某个环境下失败了。随后，人们给出了这一算法的改进，那么原先失败的数据还可以拿过来重用，作为一个不错的initialization；而新的数据又可以被加入数据集。这样，每一点努力都没有被浪费。
+
+# Reference Papers
+
+1. [AWAC: Accelerating Online Reinforcement Learning with Offline Datasets](https://arxiv.org/abs/2006.09359)
+2. [Offline Reinforcement Learning with Implicit Q-Learning](https://arxiv.org/abs/2110.06169)
+3. [Conservative Q-Learning for Offline Reinforcement Learning](https://arxiv.org/abs/2006.04779)
+4. [MOPO: Model-Based Offline Policy Optimization](https://arxiv.org/abs/2005.13239)（惩罚模型不确定度的方法）
+5. [COMBO: Conservative Offline Model-Based Policy Optimization](https://arxiv.org/abs/2106.11407)
+6. [Reinforcement Learning as One Big Sequence Modeling Problem](https://arxiv.org/abs/2104.13694)（Trajectory Transformer）
+7. [Actionable Models: Unsupervised Offline Reinforcement Learning of Robotic Skills](https://arxiv.org/abs/2104.07749)（Unsupervised learning，基于goal-conditioned）

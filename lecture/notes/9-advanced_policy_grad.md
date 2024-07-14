@@ -323,3 +323,9 @@ $$
 $$
 
 归纳得证。
+
+# Reference Papers
+
+1. [Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477)
+2. [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
+3. [Reinforcement learning of motor skills with policy gradients](https://www.ias.informatik.tu-darmstadt.de/uploads/Publications/Publications/Neural-Netw-2008-21-682_4867[0].pdf)（介绍了Natural Gradient）

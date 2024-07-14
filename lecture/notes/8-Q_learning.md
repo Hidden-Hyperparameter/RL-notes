@@ -125,3 +125,9 @@ $$
     - 为什么这样做有效？还是上一讲的那个例子：如果一个batch里面有一些Q为1,2,3的数据，还有一个Q为-1000000的数据，那么参数肯定会被后者的巨大梯度拽到使得那个很差的Q最精确的地方。但我们实际上并不关心那个很差的Q到底是-1000000还是-500000，因此这个截断版本的loss很有效。
 - **Always** use Double Q learning: it has no downsides
 - Sometimes use multi-step returns (but it has a theoretical error)
+
+# Reference Papers
+
+1. [Continuous control with deep reinforcement learning](https://arxiv.org/abs/1509.02971)（DDPG）
+2. [Continuous deep Q-learning with model-based acceleration](https://arxiv.org/abs/1603.00748)（NAF）
+3. [Dueling network architectures for deep reinforcement learning](https://arxiv.org/abs/1511.06581)

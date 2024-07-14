@@ -383,3 +383,10 @@ Nonlinear Model-Predictive Control是一个强大的算法，它在环境动力�
 这个算法另外一个值得一提的特点是，其**对动力学的正确性**是不敏感的。实验上，在Hopper环境（即一个几个关节构成的机械腿做跳跃）中，实验人员为动力学系统赋了一个错误的参数（整体质量变为原先的2倍或一半）。但机器人的表现只是开始看起来有些笨拙，而很快也就完成了目标。
 
 > 为什么会这样？我们知道，基于动力学的模型本身应该是对动力学敏感的。但这个算法的 **“短视”性** 恰恰帮助它在错误的环境下依然走向正途。比如说，虽然错误的参数可能导致决策的偏差，但第一步的偏差是最小的。而我们的算法又只take了决策出来的第一步，然后重新观察并重新决策。这样，这个算法就可以在错误的动力学下依然保持robust。
+
+# Reference Papers
+
+1. [A Survey of Monte Carlo Tree Search Methods](http://www.incompleteideas.net/609%20dropbox/other%20readings%20and%20resources/MCTS-survey.pdf)（MCTS的综述）
+2. [Differential dynamic programming](https://books.google.com.hk/books/about/Differential_Dynamic_Programming.html)（介绍和提出DDP的一本书）
+3. [Synthesis and Stabilization of Complex Behaviors through Online Trajectory Optimization](https://homes.cs.washington.edu/~todorov/papers/TassaIROS12.pdf)（实现nonlinear Model Predictive Control的paper）
+4. [Learning Neural Network Policies with Guided Policy Search under Unknown Dynamics](https://papers.nips.cc/paper_files/paper/2014/hash/6766aa2750c19aad2fa1b32f36ed4aee-Abstract.html)

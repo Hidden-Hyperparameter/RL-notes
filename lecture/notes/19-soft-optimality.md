@@ -467,3 +467,11 @@ SAC algorithm的效果十分显著。一方面，它训练出来的policy具有�
 - **robustness**：仍然是因为max entropy，policy学会的更多，所以它的robustness更好；
 - **more general approach**：不管怎么说，再不济，我们把temperature调节为0也可以回到传统的Q learning方法。因此，这样的方法肯定在调参后不会差。
 - **more human-like**：这一点是最重要的，也是我们的初心。这样训练出来的agent像有血有肉的人，而不是变成一个追求最优的机器。
+
+# Reference Papers
+
+1. [Reinforcement Learning and Control as Probabilistic Inference: Tutorial and Review](https://arxiv.org/abs/1805.00909)（graphical model的引入）
+2. [Modeling Interaction via the Principle of Maximum Causal Entropy](https://www.cs.cmu.edu/~bziebart/publications/maximum-causal-entropy.pdf)（maximum causal entropy的引入）
+3. [Reinforcement Learning with Deep Energy-Based Policies](https://arxiv.org/abs/1702.08165)（soft Q-learning的引入）
+4. [Soft Actor-Critic Algorithms and Applications](https://arxiv.org/abs/1812.05905)（更多的SAC算法）
+5. [Equivalence between policy gradients and soft Q-learning](https://arxiv.org/abs/1704.06440)

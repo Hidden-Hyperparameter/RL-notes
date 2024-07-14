@@ -196,3 +196,10 @@ p(o_{t+1}|o_t,a_t)
 $$
 
 这样算法上是爽了，但相对应的就需要神经网络处理$o_t$的水平很高。比如，可能给定$o_t$之后进行多层卷积，还可能需要attention。这一方法也有成功的案例，但我们就不做过多介绍。
+
+# Reference Papers
+
+1. [Neural Network Dynamics for Model-Based Deep Reinforcement Learning with Model-Free Fine-Tuning](https://arxiv.org/abs/1708.02596.pdf)（介绍model-based和model-free的结合）
+2. [Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models](https://arxiv.org/abs/1805.12114.pdf)（非常sample-efficient的model-based RL方法）
+3. [Sample-Efficient Reinforcement Learning with Stochastic Ensemble Value Expansion](https://arxiv.org/abs/1807.01675.pdf)（介绍了model-based RL中的ensemble方法）
+4. [SOLAR: Deep Structured Representations for Model-Based Reinforcement Learning](https://arxiv.org/abs/1808.09105.pdf)（介绍了 partially observed model-based RL中的latent variable方法）

@@ -246,3 +246,7 @@ $$
 其中最后一步，前一项使用我们对approximation error的假设，而后面一项是sampling error分析得到的结论。
 
 再来观看这一结果，可以发现，我们还是获得了一个对horizon $\frac{1}{1-\gamma}$成平方关系的误差。这有些令人惊讶，说明即使是自由采样的情况下，由于Fitted Q iteration算法本身的原因和采样的有限，我们仍然会面临这个问题。当然，给定更强的假设，可以获得更强的结论，但这里就不介绍。
+
+# Reference Papers
+
+1. [RL Theory Textbook](https://rltheorybook.github.io)

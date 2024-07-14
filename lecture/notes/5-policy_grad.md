@@ -201,3 +201,9 @@ $$
 # Further Policy Gradients
 
 我们会在第9讲继续介绍有关policy gradient的知识。届时，我们会从另外一个角度理解policy gradient，并对其提出一个重要的改进。
+
+# Reference Papers
+
+1. [Guided Policy Search](https://proceedings.mlr.press/v28/levine13.html)（使用importance sampling的policy gradient方法）
+2. [Infinite-horizon policy-gradient estimation](https://arxiv.org/abs/1106.0665) （介绍了temporally decomposed policy gradient）
+3. [Reinforcement learning of motor skills with policy gradients](https://www.ias.informatik.tu-darmstadt.de/uploads/Publications/Publications/Neural-Netw-2008-21-682_4867[0].pdf)（介绍了optimal baselines 和 natural gradient）

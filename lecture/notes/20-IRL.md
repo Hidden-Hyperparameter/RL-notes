@@ -301,3 +301,11 @@ $$
 ### What if we just use the vanilla GAN?
 
 也许有人说，你的方法确实可以work，但我就用一个sequence model作用在$\tau$上面，然后直接训练GAN，不就好了吗？理论上，完全没有问题，并且这个训练肯定会相比于上面的东西更加稳定；但是问题在于，这样我们完全无法recover出reward function（因为我们知道最优的discriminator最后会变成random guess）。因此，这样的方法只能算是imitation learning，而不是IRL。
+
+# Reference Papers
+
+1. [Apprenticeship Learning via Inverse Reinforcement Learning](https://ai.stanford.edu/~ang/papers/icml04-apprentice.pdf)（介绍了IRL的基本思想）
+2. [Maximum margin planning](https://martin.zinkevich.org/publications/maximummarginplanning.pdf)
+3. [Maximum Entropy Inverse Reinforcement Learning](https://www.aaai.org/Papers/AAAI/2008/AAAI08-227.pdf)
+4. [A Connection Between Generative Adversarial Networks, Inverse Reinforcement Learning, and Energy-Based Models](https://arxiv.org/abs/1611.03852)
+5. [Learning Robust Rewards with Adversarial Inverse Reinforcement Learning](https://arxiv.org/abs/1710.11248)

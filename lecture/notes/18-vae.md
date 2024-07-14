@@ -163,3 +163,11 @@ $$
 
 - representation learning：我们在训练模型打游戏的时候，如果直接把pixel作为state，就会有很多问题（维度大，很多不同的图片实际上对应着类似的信息，等等）。因此，我们可以**用VAE先把图片压缩到$z$，再在$z$上训练RL agent**。
 - imitation learning：我们之前在imitation learning的过程中，提到不同的expert在面对state的时候可能作出不同的action（比如，前面是一棵树，滑雪运动员可能向左或者向右绕过）。这可能会给普通的概率模型$\pi_{\theta}(a|s)$一些挑战，但VAE不会被多峰的分布难倒。因此，使用VAE做imitation learning是一个不错的选择。
+
+# Reference Papers
+
+1. [Embed to Control: A Locally Linear Latent Dynamics Model for Control from Raw Images](https://arxiv.org/abs/1506.07365)（state-space model）
+2. [SOLAR: Deep Structured Representations for Model-Based Reinforcement Learning](https://arxiv.org/abs/1808.09105)（state-space model）
+3. [Learning Latent Dynamics for Planning from Pixels](https://arxiv.org/abs/1811.04551)（state-space model）
+4. [Stochastic Latent Actor-Critic: Deep Reinforcement Learning with a Latent Variable Model](https://arxiv.org/abs/1907.00953)（state-space model）
+5. [Dream to Control: Learning Behaviors by Latent Imagination](https://arxiv.org/abs/1912.01603)（state-space model）

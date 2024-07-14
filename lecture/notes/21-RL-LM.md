@@ -215,3 +215,10 @@ $$
 当然，无论使用哪一种方法，我们都还有一个重要的事情需要注意：不论怎么说，训练过程是一个offline的过程（因为我们训练的trajectory都是从最原始的普通language model这一policy采样得到的）。因此，第十六讲中的很多**Offline RL方法**需要被使用，如CQL，IQL等等。顺便一提，如果把Q当作这个“新的”语言模型的logits，那么原先最后形式的[CQL penalty](./16-offline-RL_2.md#another-method-controlling-q-values)就是**cross-entropy loss**，也就是限制模型输出的Q值在原先的next-token上面不能太低。直观看，这也是合理的。
 
 最后，作为总结，multi-step的对话模型还是很open的问题，当下也没有一个明确的针对它的结论。这一领域往往是我们介绍的众多RL方法和DL共同塑成的产物。
+
+# Reference Papers
+
+1. [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2008.02275)（最早的RLHF）
+2. [Direct Preference Optimization: Your Language Model is Secretly a Reward Model](https://arxiv.org/abs/2009.01395)
+3. [Recurrent Experience Replay in Distributed Reinforcement Learning](https://arxiv.org/abs/1707.01495)（Historical state）
+4. [Learning Cooperative Visual Dialog Agents with Deep Reinforcement Learning](https://arxiv.org/pdf/1703.06585)（Multi-step chatbot）
