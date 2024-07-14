@@ -3,7 +3,7 @@
 **Behavioral Cloning**
 
 $$
-\theta^\star = \argmax_{\theta}\log \pi_\theta(a=\pi^\star(s)|s)
+\theta^\star = \arg\max_{\theta}\log \pi_\theta(a=\pi^\star(s)|s)
 $$
 
 **Dagger**
