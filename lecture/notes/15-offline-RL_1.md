@@ -158,7 +158,7 @@ $$
 
 其中$\hat{V}(s_t)$和$\hat{Q}(s_t,a_t)$就是用来近似的函数。这个公式的意义在于，如果$r(s_t,a_t)+\gamma \bar{V}^{T-t-1}-\hat{Q}(s_t,a_t)$就是0，那么后面的连乘积贡献会非常小；而即使后面不是0,也部分地缓解了连乘积的问题。Doubly Robust的帮助是使得这一递推表达尽量接近于原来严格的公式。
 
-当然，具体的细节也会比较复杂，可以参考[这里](https://arxiv.org/pdf/1511.03722)。
+当然，具体的细节也会比较复杂，可以参考[这里](https://arxiv.org/abs/1511.03722)。
 
 ## Marginalized Importance Sampling
 
@@ -186,7 +186,7 @@ $$
 w(s,a)p_{\pi_\beta}(s,a)=(1-\gamma)p_0(s)\pi(a|s)+\gamma\sum_{s',a'}p(s|s',a')\pi(a|s)w(s',a')p_{\pi_\beta}(s',a')
 $$
 
-实验上，我们可以把左边和右边放入某个divergence，然后采样估计（参见[原论文](https://arxiv.org/pdf/2002.09072)），并梯度下降给出最好的$w$。有了$w$，我们就可以立刻估计出$V^{\pi}(s_0)$，从而在Offline的情况下完成policy evaluation。
+实验上，我们可以把左边和右边放入某个divergence，然后采样估计（参见[原论文](https://arxiv.org/abs/2002.09072)），并梯度下降给出最好的$w$。有了$w$，我们就可以立刻估计出$V^{\pi}(s_0)$，从而在Offline的情况下完成policy evaluation。
 
 # Offline RL: Old Methods
 

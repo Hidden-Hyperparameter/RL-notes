@@ -358,4 +358,4 @@ $$
 \arg\max_{a_t} Q^\pi(h_t)=\arg\max_{a_t}\frac{1}{1-\gamma}\sum_h r(h)p_{\text{fut}}(h|h_t)
 $$
 
-那么$C(h)$就没有影响。这一思想被应用到所谓**C-learning**（C for classifier）中。但C-learning的算法[本身](https://arxiv.org/pdf/2011.08909)比较复杂（涉及到Goal-conditioned learning），这里就不再展开了。
+那么$C(h)$就没有影响。这一思想被应用到所谓**C-learning**（C for classifier）中。但C-learning的算法[本身](https://arxiv.org/abs/2011.08909)比较复杂（涉及到Goal-conditioned learning），这里就不再展开了。

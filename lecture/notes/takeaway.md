@@ -138,11 +138,25 @@ $$
 
 # 9-Advanced Policy Gradients
 
+**KL Penalty**
+
+$$
+\tilde{J}=\sum_{t=0}^{T-1}\gamma^t \mathbb{E}_{s_t\sim p_{{\theta_0}}(s_t)}\left[\mathbb{E}_{a_t\sim \pi_{\theta_0}(a_t|s_t)}\left[A^{\pi_{\theta_0}}(s_t,a_t)\frac{\pi_{\theta_1}(a_t|s_t)}{\pi_{\theta_0}(a_t|s_t)}\right]\right]-\beta \text{KL}\left(\pi_{\theta_1}(\cdot|s_t)||\pi_{\theta_0}(\cdot|s_t)\right)
+$$
+
+- example method (know the name): **PPO**
+
 **Natural Gradients**
 
 $$
 \theta_1\leftarrow \theta_0 + \eta \frac{F^{-1}g}{\sqrt{g^TF^{-1}g}},g=\nabla_\theta J(\theta)
 $$
+
+$$
+\mathbf{F}=\mathbb{E}_{a\sim \pi_\theta(a|s)}\left[\nabla_\theta \log \pi_\theta(a|s)\nabla_\theta \log \pi_\theta(a|s)^T\right]
+$$
+
+- example method (know the name): **TRPO**
 
 # 10 Optimal Control & Planning
 

@@ -139,7 +139,7 @@ $$
 \beta\leftarrow \beta+\alpha(\text{KL}-\epsilon)
 $$
 
-决定。
+决定。一个基于这样的思路的著名算法是**PPO（Proximal Policy Optimization）**。
 
 ### Method 2: Natural Gradient
 
@@ -187,7 +187,7 @@ $$
 \theta_1\leftarrow \theta_0 + \sqrt{2\epsilon} \frac{F^{-1}g}{\sqrt{g^TF^{-1}g}}
 $$
 
-其中$g=\nabla_{\theta_0} J(\theta_0)$是原来的梯度。这个算法就被称为**Natural Gradient**。
+其中$g=\nabla_{\theta_0} J(\theta_0)$是原来的梯度。这个算法就被称为**Natural Gradient**。还有一个更著名的、基于这一方法的算法，称为**TRPO（Trust Region Policy Optimization）**。
 
 > Q: 直观地说，Natural Gradient在做什么？
 >
