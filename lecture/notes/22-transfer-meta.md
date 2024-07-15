@@ -6,8 +6,8 @@
 - 假设一个model在A任务上面训练，有没有办法在B任务上面表现的很好？这称为**forward transfer learning**。
     - 假设在B任务上，我们只能提供相比在A任务上很少的数据。比如，在A任务上训练10000个样本，但在B任务上只有10个样本。
     - 顺便一提，A称为**source task**，B称为**target task**。
-- 假设一个model在$A_1,A_2,\cdots,A_n$这$n$个任务上面训练，有没有办法在B任务上面表现的很好（其他的假设和之前一样）？这称为**multi-task transfer learning**。
-- 最为神奇地，我们能否在若干个task $A_1,\cdots,A_n$上面训练某种“智能体”。然后，把B任务的**训练集**给它，它**自己利用训练集对自己进行操作（注意这一操作不一定是传统的梯度下降）**，然后在B任务上面表现的很好？这称为**meta learning**，也就是learn to learn。
+- 假设一个model在 $A_1,A_2,\cdots,A_n$ 这 $n$ 个任务上面训练，有没有办法在B任务上面表现的很好（其他的假设和之前一样）？这称为**multi-task transfer learning**。
+- 最为神奇地，我们能否在若干个task $A_1,\cdots,A_n$ 上面训练某种“智能体”。然后，把B任务的**训练集**给它，它**自己利用训练集对自己进行操作（注意这一操作不一定是传统的梯度下降）**，然后在B任务上面表现的很好？这称为**meta learning**，也就是learn to learn。
     - meta learning也有很多表述，比如说，这也可以被理解为，我们 **“学习”一个optimizer**，输入model的初始参数和训练集，输出一个在这个训练集上面表现的很好的新参数。如图所示。
 
 ![](./assets/22-1.png)
@@ -51,13 +51,13 @@ Domain shift实际上是人们在DL中就可以解决的问题。按照我们的
 
 研究者决定依然采用GAN的方法；但是现在，discriminator观察(state,action)对，然后判断这个对是来自source还是target domain。这样的话，如果在墙旁边，因为target domain中模型无法被穿过，所以就立刻会被判断为target domain。因此，模型会学会很远地绕过墙，不被它所干扰。
 
-当然，这是一个极度简化的描述；实际的实现中，我们会建立一个新的reward $\tilde{r}$：
+当然，这是一个极度简化的描述；实际的实现中，我们会建立一个新的reward $\tilde{r}$ ：
 
 $$
 \tilde{r}(s,a)=r_{\text{src}}(s,a)+\Delta r(s,a)
 $$
 
-（注意我们是在source domain的reward上面做更改。）其中，$\Delta r(s,a)$就是discriminator给出的附加reward，模型做的事情在target domain里面越不可能，这个reward越小。
+（注意我们是在source domain的reward上面做更改。）其中， $\Delta r(s,a)$ 就是discriminator给出的附加reward，模型做的事情在target domain里面越不可能，这个reward越小。
 
 用这样的方法，研究者做了一个实验：训练一个ant在无穷大平面上奔跑。接下来，把它限制在一个有限的圆盘上。实验发现，真的很像一只动物一样，ant先迅速奔跑到圆盘边缘，然后忽然减速，似乎有些犹豫地转了几圈，随后立刻折返。
 
@@ -89,11 +89,11 @@ Multi-task transfer learning的理想未来是：
 
 在RL里面，其实可以把multi-task RL“压缩”为**一个**MDP，从而把它转化为一个RL问题。
 
-一个最简单的方法是，在$s_0$做一个action $a_0$，进入哪个$s_1$代表进入哪个“世界”；而进入了这一世界之后再按照MDP演化。当然，这只是一个文字游戏，不同的“世界”之间的共性的提取并没有因此而简化，因此意义不大。
+一个最简单的方法是，在 $s_0$ 做一个action $a_0$ ，进入哪个 $s_1$ 代表进入哪个“世界”；而进入了这一世界之后再按照MDP演化。当然，这只是一个文字游戏，不同的“世界”之间的共性的提取并没有因此而简化，因此意义不大。
 
-一个有意义的简化方式是，如果很多task包含共同的state,action（比如，我们的task有让hopper前进，有的让hopper后退，有的让它原地跳跃，等等），那么就可以把他们（有意义地）放入同一个MDP。此时，如何分辨task？我们加入一个$\omega$，称为**context**，刻画了我们在做什么。这样，完整的state space是$(s,\omega)$，我们在这样的一个MDP上面学习。这才真正地把multi-task RL变成了一个RL问题。这称为**contextual policies**。它的主要应用就是所说的，多个task是改变某个目标的参数的情形（向前，向后，不动）。
+一个有意义的简化方式是，如果很多task包含共同的state,action（比如，我们的task有让hopper前进，有的让hopper后退，有的让它原地跳跃，等等），那么就可以把他们（有意义地）放入同一个MDP。此时，如何分辨task？我们加入一个 $\omega$ ，称为**context**，刻画了我们在做什么。这样，完整的state space是 $(s,\omega)$ ，我们在这样的一个MDP上面学习。这才真正地把multi-task RL变成了一个RL问题。这称为**contextual policies**。它的主要应用就是所说的，多个task是改变某个目标的参数的情形（向前，向后，不动）。
 
-另外一个方式也是我们之前提到的，**goal-conditioned policies**。这一方法的state space是$(s,g)$，其中$g$代表最后要到达的state。还记得我们之前提到，这种方法可以让机器使用自己的reward（比如 $\mathbf{1}[s=g]$ ）来“dream goal to learn”，不需要环境额外提供reward。我们只需要把模型放进环境里，让他设计goal并试图reach goal，就可以完成Multi-task RL。
+另外一个方式也是我们之前提到的，**goal-conditioned policies**。这一方法的state space是 $(s,g)$ ，其中 $g$ 代表最后要到达的state。还记得我们之前提到，这种方法可以让机器使用自己的reward（比如 $\mathbf{1}[s=g]$ ）来“dream goal to learn”，不需要环境额外提供reward。我们只需要把模型放进环境里，让他设计goal并试图reach goal，就可以完成Multi-task RL。
 
 这一方法的优势是，如果test的goal就是dream过的goal，那么就立刻完成；但是缺陷也很明显——不是所有的目标都可以写为goal的形式。（我们[当时](./14-exploration_2.md#exploration-by-skills)也举过例子，要求绕开某个区域，就是对历史的刻画，不能表述为只依赖于最终state的goal形式。）
 
@@ -122,15 +122,15 @@ $$
 g(D_{\text{train}})\in \mathcal{F};\qquad  g(D_{\text{train}})(x) = y\quad (x\in \text{test})
 $$
 
-也就是说，输入训练集后，meta learning algorithm给出 $g(D_{\text{train}})$ 这一个 **函数** ，这个函数可以接受一个新的$x$，然后输出$y$。
+也就是说，输入训练集后，meta learning algorithm给出 $g(D_{\text{train}})$ 这一个 **函数** ，这个函数可以接受一个新的 $x$ ，然后输出 $y$ 。
 
-我们再来分析，学到了的参数是什么。在普通的learning过程，学的是一个参数$\theta$：
+我们再来分析，学到了的参数是什么。在普通的learning过程，学的是一个参数 $\theta$ ：
 
 $$
 \theta^\star = \arg\min_\theta L(f_\theta; D_{\text{train}})
 $$
 
-（比如说，$L(f_\theta; D_{\text{train}})=\sum_{x\sim D_{\text{train}}}(y-f_\theta(x))^2$）。而在meta learning中，我们学的参数是$\phi$，满足
+（比如说， $L(f_\theta; D_{\text{train}})=\sum_{x\sim D_{\text{train}}}(y-f_\theta(x))^2$ ）。而在meta learning中，我们学的参数是 $\phi$ ，满足
 
 $$
 \phi^\star = \arg\min_\phi L_{\text{meta}}(g_\phi;D_{\text{meta,train}})
@@ -146,7 +146,7 @@ $$
 
 ![](./assets/22-3.png)
 
-而在RL中，情况也很类似；对于普通的问题，我们优化的是cumulative reward $R$：
+而在RL中，情况也很类似；对于普通的问题，我们优化的是cumulative reward $R$ ：
 
 $$
 \theta^\star = \arg\max_\theta J(\pi_\theta;\text{MDP}) = \arg \max_\theta \mathbb{E}_{\tau\sim \pi_\theta}[R(\tau)]
@@ -158,7 +158,7 @@ $$
 \phi^\star = \arg\max_\phi J(g_\phi;D_\text{meta}) = \arg\max_\phi \sum_{\text{MDP}\in D_{\text{meta}}}J(g_\phi(\text{MDP});\text{MDP})
 $$
 
-也就是说，我们的meta learner $g_\phi$ **输入MDP，输出policy**。此时的meta trainin set $D_{\text{meta}}$就简单地是一组MDP。
+也就是说，我们的meta learner $g_\phi$ **输入MDP，输出policy**。此时的meta trainin set $D_{\text{meta}}$ 就简单地是一组MDP。
 
 最后，我们来举一个形象的，RL中的meta learning的例子。比如，都是cheetah的环境，但是reward不同：在meta training set中，包含的环境一个的目标是向前1m/s，一个是向后1m/s，一个是向前0.5m/s；然后，在test中，目标是向后0.2m/s。
 
@@ -168,19 +168,19 @@ $$
 
 我们考虑如何实现上面的meta learning。当然，前提是你必须清楚meta learning在干什么！如果不太清楚（这很合理，因为这一概念更抽象了一层），请再阅读上面的内容（或者为仓库提交issue）。
 
-一个在DL中经典的方法是，我们搞一个RNN，把$D_{\text{train}}$里面的对$(x,y)$一个一个输入进去，并且让最后**输出的hidden state就是$g_{\phi}(D_{\text{train}})$这一模型的参数**。换句话说，
+一个在DL中经典的方法是，我们搞一个RNN，把 $D_{\text{train}}$ 里面的对 $(x,y)$ 一个一个输入进去，并且让最后**输出的hidden state就是 $g_{\phi}(D_{\text{train}})$ 这一模型的参数**。换句话说，
 
 $$
 g_{\phi}(D_{\text{train}})(x) = \text{Model}_{\text{RNN}_\phi((x_1,y_1),(x_2,y_2),\cdots)}(x)
 $$
 
-其中，$\text{Model}$代表一个普通的模型（比如说，图片分类的话就可以是一个卷积网络，而它角标代表着RNN的输出hidden state刚好就作为它的参数）。
+其中， $\text{Model}$ 代表一个普通的模型（比如说，图片分类的话就可以是一个卷积网络，而它角标代表着RNN的输出hidden state刚好就作为它的参数）。
 
 那么，在RL里，我们应该怎么做？和之前一样，最大的差别就在于，在RL中训练集不是given的，而是需要我们自己通过和环境交互来获得。我们接下来探讨几个思路。
 
 #### Meta Learning as a Multi-task Learning Problem
 
-你也许会发现——meta learning和multi-task learning比较像。假设我们有一个multi-task learning的算法，我们能否**用这个算法作为$g_\phi$**，来做meta learning呢？你会发现，这当然是可以的——但是这就违背了我们的初心。好比说，我们在DL的meta learning里面，取$g_\phi$为gradient descent一样。你看那个$\phi$——它的意思是要我们训一个模型，而不是用一些人类指明的方法。
+你也许会发现——meta learning和multi-task learning比较像。假设我们有一个multi-task learning的算法，我们能否**用这个算法作为 $g_\phi$**，来做meta learning呢？你会发现，这当然是可以的——但是这就违背了我们的初心。好比说，我们在DL的meta learning里面，取 $g_\phi$ 为gradient descent一样。你看那个 $\phi$ ——它的意思是要我们训一个模型，而不是用一些人类指明的方法。
 
 我们可以想到，原来的multi-task learning中的contextual policy可以写为
 
@@ -188,10 +188,10 @@ $$
 \pi_\theta(a|s;\omega)
 $$
 
-现在，meta learning和multi-task learning的区别就是，我们的 **$\omega$不是给定的，而是需要一个网络（就是$\phi$）从MDP中提取出来**。这样，我们就可以给出一种实现方式：
+现在，meta learning和multi-task learning的区别就是，我们的 **$\omega$ 不是给定的，而是需要一个网络（就是 $\phi$ ）从MDP中提取出来**。这样，我们就可以给出一种实现方式：
 
-- 在任意时刻，通过历史上的所有transition $(s,a,s',r)$**经过RNN**，得到一个hidden state $\omega$；
-- policy $\pi_\theta$输入$\omega$和state $s$，输出action $a$。
+- 在任意时刻，通过历史上的所有transition $(s,a,s',r)$**经过RNN**，得到一个hidden state $\omega$ ；
+- policy $\pi_\theta$ 输入 $\omega$ 和state $s$ ，输出action $a$ 。
 
 通过这样的方法，我们可以想像：如果模型足够好，它应该可以学会根据历史上的transition学习出环境的信息，同时规划出exploration的方案。因此，这一方法理论上是可行的。
 
@@ -209,13 +209,13 @@ $$
 
 ![](./assets/22-4.png)
 
-接下来，为了简单讨论，我们取fine tune只包含一个gradient step（还是之前说的那样，我们只是做一个科普，会略去很多技术细节）。在这一模型下，meta learner $g_\phi$就是：
+接下来，为了简单讨论，我们取fine tune只包含一个gradient step（还是之前说的那样，我们只是做一个科普，会略去很多技术细节）。在这一模型下，meta learner $g_\phi$ 就是：
 
 $$
 g_\phi(\text{MDP}) = \phi + \alpha \nabla_\phi J(\pi_\phi;\text{MDP})
 $$
 
-其中$J_{\text{MDP}}$就代表着MDP上面的cumulative reward objective。接下来，在meta training的时候，我们还要再做一次gradient descent：
+其中 $J_{\text{MDP}}$ 就代表着MDP上面的cumulative reward objective。接下来，在meta training的时候，我们还要再做一次gradient descent：
 
 $$
 \phi \leftarrow \phi + \beta \nabla_\phi J_{\text{meta}}(g_\phi) = \phi +  \beta\nabla_\phi \sum_{\text{MDP}\in D_{\text{meta}}}J(\pi_{\phi + \alpha \nabla_\phi J(\pi_\phi;\text{MDP})};\text{MDP})
@@ -227,7 +227,7 @@ $$
 
 你可能会奇怪，variational inference和meta learning，这两个话题好像完全没有任何关系。的确，为了引入这一方法，我们需要首先重新给meta RL一个新的叙述。
 
-**Meta RL可以是一个POMDP**！其实，在介绍第一个方法（RNN）的时候，你也许就已经想到了——把历史上的所有transition放在一起过RNN，这很像我们上一讲介绍的，把observation放在一起当作history state。的确——我们可以把模型处理的任务$\omega$也当作state的一部分，而这一部分（和multi-task learning的不同）是不可以观察到的。前面RNN的引入，就是为了把这一部分的信息提取出来。
+**Meta RL可以是一个POMDP**！其实，在介绍第一个方法（RNN）的时候，你也许就已经想到了——把历史上的所有transition放在一起过RNN，这很像我们上一讲介绍的，把observation放在一起当作history state。的确——我们可以把模型处理的任务 $\omega$ 也当作state的一部分，而这一部分（和multi-task learning的不同）是不可以观察到的。前面RNN的引入，就是为了把这一部分的信息提取出来。
 
 但是在POMDP里我们还有另外一个选择！我们可以构造一个variational的state space model，放到这里就是
 
@@ -235,15 +235,15 @@ $$
 q\left(\omega _t | (s_1,a_1,r_1,s'_1),\cdots,(s_t,a_t,r_t,s'_t)\right)
 $$
 
-然后，我们可以同时训练这个VAE和一个policy $\pi(a|s;\omega)$，就像我们在POMDP中的那样。这样的方法也是可行的。一个小的细节是，我们没有必要训练一个full VAE——我们只需要一个encoder，ELBO中的两项我们也可以丢掉reconstruction loss，只保留KL penalty。
+然后，我们可以同时训练这个VAE和一个policy $\pi(a|s;\omega)$ ，就像我们在POMDP中的那样。这样的方法也是可行的。一个小的细节是，我们没有必要训练一个full VAE——我们只需要一个encoder，ELBO中的两项我们也可以丢掉reconstruction loss，只保留KL penalty。
 
-> Q: 胡说八道！这样，你这个$q$难道不会只学出一个均匀高斯吗？
+> Q: 胡说八道！这样，你这个 $q$ 难道不会只学出一个均匀高斯吗？
 > 
-> A: 并非如此。冷静一下，你会发现，我们的policy $\pi$是依赖于$\omega$的；因此，如果$q$只学出一个均匀高斯，那么policy的loss会很大。我们可以合理地期待，policy的loss可以很好的传播回来，使得$q$学会提取出有用的信息。
+> A: 并非如此。冷静一下，你会发现，我们的policy $\pi$ 是依赖于 $\omega$ 的；因此，如果 $q$ 只学出一个均匀高斯，那么policy的loss会很大。我们可以合理地期待，policy的loss可以很好的传播回来，使得 $q$ 学会提取出有用的信息。
 >
-> 而且去除decoder并非不合理——假设$\omega$包含了这个MDP的全部有效信息，decoder应该一定可以完美地decode回原始数据，因为它们都是这个MDP中的transition。因此，丢弃reconstruction term相当于假设我们有一个完美的decoder，这是完全合理的。
+> 而且去除decoder并非不合理——假设 $\omega$ 包含了这个MDP的全部有效信息，decoder应该一定可以完美地decode回原始数据，因为它们都是这个MDP中的transition。因此，丢弃reconstruction term相当于假设我们有一个完美的decoder，这是完全合理的。
 
-你也许会问，这一方法和RNN没什么差别啊——你现在在VAE里面也需要一个RNN来处理这个sequential的信息。的确，它们的思想很相似；但是，VAE的优势在于，$\omega$是比较有随机性的。对于决定性的方法，有可能出现恶性循环：RNN提取信息提取的不对，导致policy完全乱搞，获得不出来任何有reward的action，这又进一步导致RNN提取不出来信息。而VAE的随机性就使得我们更容易避免这个“死局”。
+你也许会问，这一方法和RNN没什么差别啊——你现在在VAE里面也需要一个RNN来处理这个sequential的信息。的确，它们的思想很相似；但是，VAE的优势在于， $\omega$ 是比较有随机性的。对于决定性的方法，有可能出现恶性循环：RNN提取信息提取的不对，导致policy完全乱搞，获得不出来任何有reward的action，这又进一步导致RNN提取不出来信息。而VAE的随机性就使得我们更容易避免这个“死局”。
 
 作为具体的实现，[PEARL](https://arxiv.org/abs/1903.08254)是一个很好的例子。如果感兴趣可以进一步研究其实现细节。
 
@@ -252,7 +252,7 @@ $$
 最后，我们来看一看前面介绍完的三个meta learning方法：
 - 用RNN学习历史数据，用hidden state当作policy的parameterization；
 - MAML：训练一个“干细胞”，可以很快、很好地“分化”到各种task上；
-- 用历史数据学习出来task latent variable $\omega$，并让policy condition on $\omega$。
+- 用历史数据学习出来task latent variable $\omega$ ，并让policy condition on $\omega$ 。
 
 它们之间在实践中有着比较大的区别。最常见、好用的方法还是MAML，但它往往需要更多的计算资源；相比之下，第一、三方法更容易overfit（我们说的是meta-overfit！也就是说，对于稍微OOD的test task就无法体现），某种程度是因为它们都依赖于RNN。此外，实验上发现，第一、三方法的训练过程也更为艰难，也许还是因为RNN的信息传递不够充足。
 

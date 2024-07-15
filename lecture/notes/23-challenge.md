@@ -42,11 +42,11 @@
 ## Sample Efficiency
 
 我们来比较一下RL不同方法中的sample efficiency，从小到大：
-- **gradient free methods**：其实我们甚至没有介绍这一类方法，它们是RL最原始的尝试，不需要梯度下降。它们的思想是借鉴“自然选择”的理念，让多个agent优胜劣汰，不断“进化”。可以想象到，这种方法的sample efficiency是最低的。一个典型的量级（比如Cheetah环境）是 **$10^8$次交互**，也就是$10^6$个episode。对应到真实时间，这大概是15天。
-- **fully on-policy policy gradients**：最原始的policy gradient方法，比如A3C（这个我们也没有仔细介绍，它是将Actor Critic方法进行并行的方法，感兴趣可以参考[这篇论文](https://arxiv.org/abs/1602.01783)）。这个方法的量级大概是 **$10^7$次交互**，也就是$10^5$个episode。但是，值的一提的是，它可以高效地并行，因此不一定需要花特别长的时间，只要你有充足的算力。
-- **advanced policy gradients**：基于TRPO和PPO的方法可以减少算法的“on policy程度”，进而提高sample efficiency。这个方法的量级大概是 **$10^6$次交互**，也就是$10^4$个episode。
-- **replay buffer-based method**：比如说Q-learning或者SAC，这些off-policy的方法可以利用replay buffer，进而提高sample efficiency。这个方法的量级大概是 **$10^5$次交互**，也就是$10^3$个episode。对于SAC等方法，一个典型的概念是，解决real world的任务（不是通过模拟器），只需要**几个小时**就够了。
-- **model-based method**：这些方法的量级大概是$10^4$次交互，也就是$10^2$个episode。
+- **gradient free methods**：其实我们甚至没有介绍这一类方法，它们是RL最原始的尝试，不需要梯度下降。它们的思想是借鉴“自然选择”的理念，让多个agent优胜劣汰，不断“进化”。可以想象到，这种方法的sample efficiency是最低的。一个典型的量级（比如Cheetah环境）是 **$10^8$ 次交互**，也就是 $10^6$ 个episode。对应到真实时间，这大概是15天。
+- **fully on-policy policy gradients**：最原始的policy gradient方法，比如A3C（这个我们也没有仔细介绍，它是将Actor Critic方法进行并行的方法，感兴趣可以参考[这篇论文](https://arxiv.org/abs/1602.01783)）。这个方法的量级大概是 **$10^7$ 次交互**，也就是 $10^5$ 个episode。但是，值的一提的是，它可以高效地并行，因此不一定需要花特别长的时间，只要你有充足的算力。
+- **advanced policy gradients**：基于TRPO和PPO的方法可以减少算法的“on policy程度”，进而提高sample efficiency。这个方法的量级大概是 **$10^6$ 次交互**，也就是 $10^4$ 个episode。
+- **replay buffer-based method**：比如说Q-learning或者SAC，这些off-policy的方法可以利用replay buffer，进而提高sample efficiency。这个方法的量级大概是 **$10^5$ 次交互**，也就是 $10^3$ 个episode。对于SAC等方法，一个典型的概念是，解决real world的任务（不是通过模拟器），只需要**几个小时**就够了。
+- **model-based method**：这些方法的量级大概是 $10^4$ 次交互，也就是 $10^2$ 个episode。
 - 还有一些我们没有介绍的，更专注于sample efficiency的方法的model-based方法。最强的方法可以在20分钟内完成一个真实世界的任务，比如开门。
 
 一个神奇的事情是，似乎每向下走一层，sample efficiency都提高了一个量级。这很利于我们对常见的算法需要的用时有一基础概念。

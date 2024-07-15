@@ -57,8 +57,8 @@ Takeaway/Cheatsheet: [Here](./lecture/notes/takeaway.md)
     - 多个符号代表完全相同的含义；
     - 前一页的符号在后一页变了；
     - 期待值不说明从哪个分布采样；
-    - 多个不同的概率分布全部用记号$p$表示；
-    - 还有最常见的：公式存在重要的typo。比如，在某些地方，$p^\star$和$p_\star$代表两个完全不同的意思，但又在某一处一不小心写反了。
+    - 多个不同的概率分布全部用记号 $p$ 表示；
+    - 还有最常见的：公式存在重要的typo。比如，在某些地方， $p^\star$ 和 $p_\star$ 代表两个完全不同的意思，但又在某一处一不小心写反了。
 
 我们会**尽量避免**这些现象发生，但必须先打好这一预防针。这也不是任何人的问题——很多试图把这些记号变得清楚整洁的尝试都会大概率因为发现公式变得长得离谱以至于令人无法忍受而告终。所以，在混乱的记号中理解它们的“深意”，这一能力也是RL即将为我们培训的，十分重要的技能之一:)
 
@@ -114,7 +114,7 @@ RL和DL有什么区别呢？当然，我们知道，RL和环境有关，也有�
 > Generative models are impressive because the images look like something **a person might draw**; RL models are impressive because **no person had thought of their strategies before**. ——[Sergey Levine](https://scholar.google.com/citations?user=8R35rCwAAAAJ&hl=en&oi=ao), the instructor of CS285
 
 这句话很好地概括了RL和DL（在目标上）的区别。
-- DL所做的是**模仿**，这件事情**有标准答案**。比如，对于generative model，它的最终任务就是学会数据集分布$p(x)$。人们夸赞它，夸赞它模仿地惟妙惟肖，就像是人一样。
+- DL所做的是**模仿**，这件事情**有标准答案**。比如，对于generative model，它的最终任务就是学会数据集分布 $p(x)$ 。人们夸赞它，夸赞它模仿地惟妙惟肖，就像是人一样。
 - 而RL所做的是**决策**，这件事情**没有标准答案**。我们也已经看到，agent的目的是最大化cumulative reward。如何能最大化这一reward呢？每一步又该take什么action呢？这不仅没有答案，甚至在理论上都不一定是唯一的。人们夸赞RL agent，夸赞它们作出的举动是如此的“新颖”，与普通人的方法完全不同，甚至于超越了人类的认知。
     - 比如，在当年AlphaGo战胜李世石的时候，agent给出了著名的"Move 37"，当时所有的围棋专家都无法理解这一步的意义，这就是RL的魅力所在。
 

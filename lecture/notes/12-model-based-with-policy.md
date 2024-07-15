@@ -8,9 +8,9 @@ $$
 \theta =\arg\max_{\theta}\mathbb{E}_{s_1\sim p(s_1)}\left[r(s_1,\pi_\theta(s_1))+\mathbb{E}_{s_2\sim p_\phi(s_2|s_1,a_1)}\left[r(s_2,\pi_\theta(s_2))+\cdots\right]\right]
 $$
 
-进行优化？（其中$\phi$代表我们的模型的预测结果）。注意这里一切都是已知的了，没有什么需要和环境进行交互。因此，我们直接对$\theta$求导数即可。
+进行优化？（其中 $\phi$ 代表我们的模型的预测结果）。注意这里一切都是已知的了，没有什么需要和环境进行交互。因此，我们直接对 $\theta$ 求导数即可。
 
-但我们马上又会注意到这里的问题：和之前planning的时候为什么不能直接使用一阶方法一样，现在如果对$\theta$梯度下降必然会造成梯度爆炸或者消失的问题。也就像RNN一样，这样普通的迭代式网络是无法训练的。但这里又和LSTM不同，我们不能随意修改这个表达式的形式。因此，这一方法失败了。
+但我们马上又会注意到这里的问题：和之前planning的时候为什么不能直接使用一阶方法一样，现在如果对 $\theta$ 梯度下降必然会造成梯度爆炸或者消失的问题。也就像RNN一样，这样普通的迭代式网络是无法训练的。但这里又和LSTM不同，我们不能随意修改这个表达式的形式。因此，这一方法失败了。
 
 但我们立刻反应过来，我们可以使用一些前面Model-free的时候介绍的方法。比如，可以使用policy gradient。之前我们提到，policy gradient最大的缺陷是它是on-policy的，所以不sample-efficient。但现在我们根本不care！因为演化是model给出的，而非环境。这样，我们就给出了一个非常强大的方法。用一个有趣的语言来说，这就是 **"Model-Free Methods with a Model"** 。
 
@@ -20,13 +20,13 @@ $$
 
 "Model Free Method with Model"(**wrong**)
 
-1. 运行一个base policy $\pi$，收集数据到buffer $B$；
+1. 运行一个base policy $\pi$ ，收集数据到buffer $B$ ；
 2. 重复：
-    1. 从buffer选择若干数据，学习一个动力学模型$p_\phi(s_{t+1}|s_t,a_t)$；
+    1. 从buffer选择若干数据，学习一个动力学模型 $p_\phi(s_{t+1}|s_t,a_t)$ ；
     2. 重复：
         1. 用模型生成若干trajectory的数据；
-        2. 用某种model free的算法更新policy $\pi^\star$。
-    3. 用最新的policy $\pi^\star$ 收集数据，加入buffer $B$。
+        2. 用某种model free的算法更新policy $\pi^\star$ 。
+    3. 用最新的policy $\pi^\star$ 收集数据，加入buffer $B$ 。
 
 乍一看，这个方法完全无懈可击。但实际上其存在一个巨大的漏洞：我们使用模型**生成一个full trajectory**，这会严重地放大模型的误差。还记得之前用model进行planning的时候，我们使用finite horizon并且使用MPC（只保留plan出来的第一步）来避免这个问题。现在，我们同样要避免这种情况。
 
@@ -36,7 +36,7 @@ $$
 \tau: s_1,a_1\to s_2,a_2\to \cdots \to s_T,a_T
 $$
 
-然后，我们选定一个$k$：比如我们认为模型在$k$步之内累积的误差还可以接受。我们就可以“树上开花”：
+然后，我们选定一个 $k$ ：比如我们认为模型在 $k$ 步之内累积的误差还可以接受。我们就可以“树上开花”：
 
 $$
 \tau_k: s_1,a_1\to s_2,a_2\to \cdots \to s_{T-k},a_{T-k}\to s_{T-k+1}',a_{T-k+1}'\to \cdots \to s_T',a_T'
@@ -54,20 +54,20 @@ $$
 \tau_1: s_1,a_1\to s_2,a_2\to \cdots \to s_{T-1},a_{T-1}\to s_T',a_T'
 $$
 
-其中加“ $^\prime$ ”的代表使用model的预测。这样，给定一条环境的路径，我们的模型就可以生成$k$个不同的路径。从而我们就可以用这$k$个路径来进行model free方法的更新，如下面的算法所示：
+其中加“ $^\prime$ ”的代表使用model的预测。这样，给定一条环境的路径，我们的模型就可以生成 $k$ 个不同的路径。从而我们就可以用这 $k$ 个路径来进行model free方法的更新，如下面的算法所示：
 
 > **Model Free Method with Model**
 
-1. 运行一个base policy $\pi$，收集数据到buffer $B$；
+1. 运行一个base policy $\pi$ ，收集数据到buffer $B$ ；
 2. 重复：
-    1. 从buffer选择若干数据，学习一个动力学模型$p_\phi(s_{t+1}|s_t,a_t)$；
+    1. 从buffer选择若干数据，学习一个动力学模型 $p_\phi(s_{t+1}|s_t,a_t)$ ；
     2. 重复：
-        1. 从buffer选择一条完全正确的trajectory $\tau$；
-        2. 用模型生成$k$个新的trajectory数据；
-        3. 用某种model free的算法更新policy $\pi^\star$。
-    3. 用最新的policy $\pi^\star$ 收集数据，加入buffer $B$。
+        1. 从buffer选择一条完全正确的trajectory $\tau$ ；
+        2. 用模型生成 $k$ 个新的trajectory数据；
+        3. 用某种model free的算法更新policy $\pi^\star$ 。
+    3. 用最新的policy $\pi^\star$ 收集数据，加入buffer $B$ 。
 
-但这一方法也有其缺点。注意到这样的路径前面的$1\to T-k$都是来自于buffer的，因此其分布肯定不对。这样，我们再次失去了使用on-policy算法的机会。因此，这一算法中model free不能是policy gradient，只能是off-policy的方法。
+但这一方法也有其缺点。注意到这样的路径前面的 $1\to T-k$ 都是来自于buffer的，因此其分布肯定不对。这样，我们再次失去了使用on-policy算法的机会。因此，这一算法中model free不能是policy gradient，只能是off-policy的方法。
 
 ## Q learning with Models
 
@@ -90,12 +90,12 @@ while True:
             q_net.Update()
 ```
 
-（这里和当初提出的格式略有不同。同时，`Update()`放入了内循环。这是因为我们当时说的是隔一段时间设置$\phi_0=\phi$，但后面又给出了实践中一般使用的形式，也就是每一次都进行$\phi_0\leftarrow \alpha\phi+(1-\alpha)\phi_0$。）
+（这里和当初提出的格式略有不同。同时，`Update()`放入了内循环。这是因为我们当时说的是隔一段时间设置 $\phi_0=\phi$ ，但后面又给出了实践中一般使用的形式，也就是每一次都进行 $\phi_0\leftarrow \alpha\phi+(1-\alpha)\phi_0$ 。）
 
 现在，我们可以发现，model的引入就是相当于给这个过程加入另外两个process：
 
 - 训练dynamic模型；
-- 从dynamic模型中采样数据，加入Q learning的训练buffer。具体地，我们还是采用前面的方法，根据真实环境中的一个state采样，然后用model来预测一个很短的trajectory（长度记为$T$）。
+- 从dynamic模型中采样数据，加入Q learning的训练buffer。具体地，我们还是采用前面的方法，根据真实环境中的一个state采样，然后用model来预测一个很短的trajectory（长度记为 $T$ ）。
 
 这两个过程应该放在什么位置呢？可以想象，model的训练应该放在外层，因为其相对简单，运行的次数不需要太多；而model的使用应该放在内层，至少要比从环境的采样次数多。
 
@@ -136,7 +136,7 @@ while True:
 
 ### Dyna
 
-Dyna是上面方法的一个特殊情况：我们选取$T=1$，也就是说我们只用model预测一个step。但是，相应地，我们并不是做一个采样，而是选取多个$s'$。这和前面的方法各有优劣。
+Dyna是上面方法的一个特殊情况：我们选取 $T=1$ ，也就是说我们只用model预测一个step。但是，相应地，我们并不是做一个采样，而是选取多个 $s'$ 。这和前面的方法各有优劣。
 
 Dyna的算法可以如下写出（当然，其细节和之前可能略有出入，因为毕竟是两个独立提出的算法）：
 
@@ -144,12 +144,12 @@ Dyna的算法可以如下写出（当然，其细节和之前可能略有出入�
 
 重复：
 
-1. 运行某种policy（需要exploration）获得一些$(s,a,s',r)$，加入replay buffer $B$；
+1. 运行某种policy（需要exploration）获得一些 $(s,a,s',r)$ ，加入replay buffer $B$ ；
 2. 用这一组数据更新一步dynamic model；
 3. 用这一组数据更新一次Q function；
-4. 重复$K$次：
-    1. 从buffer中取出一组数据$(s,a)$。
-    2. 从model给出的概率 $p(s'|s,a)$ 中采样 **几个** $s'$，并用期待值再次更新Q function。
+4. 重复 $K$ 次：
+    1. 从buffer中取出一组数据 $(s,a)$ 。
+    2. 从model给出的概率 $p(s'|s,a)$ 中采样 **几个** $s'$ ，并用期待值再次更新Q function。
 
 如果你已经忘记了Q learning的update方式，我们这里重新写一次：
 
@@ -157,7 +157,7 @@ $$
 Q^\pi(s_t,a_t)\leftarrow r(s_t,a_t)+\gamma \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[\max_{a_{t+1}}Q^{\pi}(s_{t+1},a_{t+1})\right]
 $$
 
-从这个表达式，我们就可以看到Dyna相比于普通Q learning的优势：原来我们对$s_{t+1}$的期望只能通过单采样进行。但现在相当于分布本身已经被我们掌握，因此我们可以**采很多样来求期待值**！这样，右边的期望估计的就会更加准确。
+从这个表达式，我们就可以看到Dyna相比于普通Q learning的优势：原来我们对 $s_{t+1}$ 的期望只能通过单采样进行。但现在相当于分布本身已经被我们掌握，因此我们可以**采很多样来求期待值**！这样，右边的期望估计的就会更加准确。
 
 ### Summary
 
@@ -201,13 +201,13 @@ $$
 Q^\pi(h_t)=\sum_{t'=t}^\infty \gamma^{t'-t}\mathbb{E}_{h_{t'}\sim p(h_{t'}|h_t)}[r(h_{t'})]
 $$
 
-其中$p(h_{t'}|h_t)$代表着$t$时刻处于$h_t$的情况下，$t'$时刻处于$h_{t'}$的概率。然后，我们稍微交换一下求和顺序：
+其中 $p(h_{t'}|h_t)$ 代表着 $t$ 时刻处于 $h_t$ 的情况下， $t'$ 时刻处于 $h_{t'}$ 的概率。然后，我们稍微交换一下求和顺序：
 
 $$
 Q^\pi(h_t)=\sum_{h}r(h)\cdot \left[\sum_{t'=t}^\infty \gamma^{t'-t}\cdot p(h_{t'}=h|h_t)\right]=\frac{1}{1-\gamma}\sum_h r(h)p_{\text{fut}}(h|h_t)
 $$
 
-这里我们定义了一个分布$p_{\text{fut}}$（代表future）：
+这里我们定义了一个分布 $p_{\text{fut}}$ （代表future）：
 
 $$
 p_{\text{fut}}(h|h_t)=(1-\gamma)\sum_{t'=t}^\infty \gamma^{t'-t}p(h_{t'}=h|h_t)
@@ -215,8 +215,8 @@ $$
 
 这一分布也被称为**successor distribution**。如何得到这样的一个分布呢？可以发现，我们可以这样来做：
 
-1. 取$t'-t\sim \text{Geom}(\gamma)$，也就是从几何分布中采样；
-2. 取$h=h_{t'}\sim p(h_{t'}|h_t)$。
+1. 取 $t'-t\sim \text{Geom}(\gamma)$ ，也就是从几何分布中采样；
+2. 取 $h=h_{t'}\sim p(h_{t'}|h_t)$ 。
 
 我们发现了问题的关键：只要输入policy后，我们能学会这个successor分布，就立刻可以输出reward。
 
@@ -234,13 +234,13 @@ $$
 =(1-\gamma)\delta_{h,h_t}+\gamma \sum_{h'}p_\pi(h'|h_t)\cdot {p_{\text{fut}}(h|h')}
 $$
 
-我们可以把 $p_{\text{fut}}(\cdot|h_t)$ 看成一个关于$h_t$的向量值函数。这时，这个向量值函数满足一个类似“Bellman方程”的，不同state-action pair之间数值的关系。注意其中$p_\pi$代表一步的分布，因此是和policy有关的。这样，我们的任务就是，给定一个policy，求解这个方程。
+我们可以把 $p_{\text{fut}}(\cdot|h_t)$ 看成一个关于 $h_t$ 的向量值函数。这时，这个向量值函数满足一个类似“Bellman方程”的，不同state-action pair之间数值的关系。注意其中 $p_\pi$ 代表一步的分布，因此是和policy有关的。这样，我们的任务就是，给定一个policy，求解这个方程。
 
 ## Introducing Representations
 
 但是首当其冲的问题在于，这个向量值函数的维度太大了——等于所有可能的action数目（不是action维度）乘以所有可能的state数目！我们完全没有办法处理它。但另外一个方面，我们又发现最后的输出直接是一个标量的reward，因此过量的信息实际上没有特别的用处。类似的情景还发生在很多地方，比如图片本身pixel的信息量远远大于图片的含义的信息量。因此，我们类似地，需要提取出一种“feature”，或者representation。
 
-为此，我们定义一个projection function $\phi$。它通常是**已知的**，基于一些专业的知识（或者神经网络）来选取。它代表着**state-action pair中的哪些成分对reward有主要的影响**。它的作用是压缩掉这个很大的维度，留下$N$个feature：
+为此，我们定义一个projection function $\phi$ 。它通常是**已知的**，基于一些专业的知识（或者神经网络）来选取。它代表着**state-action pair中的哪些成分对reward有主要的影响**。它的作用是压缩掉这个很大的维度，留下 $N$ 个feature：
 
 $$
 \phi(\cdot): \mathcal{S}\times \mathcal{A}\to \mathbb{R}^N
@@ -252,9 +252,9 @@ $$
 \psi_j (h_t):=\sum_h \phi_j(h)p_{\text{fut}}(h|h_t),\quad j=1,2,\cdots,N
 $$
 
-这些$\psi$就被称为**successor representations**。直观地说，它代表着在$h_t$之后的未来中，第$j$个feature贡献的reward。
+这些 $\psi$ 就被称为**successor representations**。直观地说，它代表着在 $h_t$ 之后的未来中，第 $j$ 个feature贡献的reward。
 
-接下来，我们首先假设$\phi$完成了这个任务，也就是保留下来了reward的主要信息。那么，reward就应该可以被这些$\phi$表示：
+接下来，我们首先假设 $\phi$ 完成了这个任务，也就是保留下来了reward的主要信息。那么，reward就应该可以被这些 $\phi$ 表示：
 
 $$
 r(h)=\sum_j w_j\phi_j(h)
@@ -266,7 +266,7 @@ $$
 Q^\pi(h_t)=\frac{1}{1-\gamma} \sum_j w_j\sum_h \phi_j(h)p_{\text{fut}}(h|h_t)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (h_t)
 $$
 
-），其中$w_j$是一些通过训练得到的参数。现在的问题是，我们能否绕过$p_{\text{fut}}$直接求出$\psi$。这也很容易，只需要代入：
+），其中 $w_j$ 是一些通过训练得到的参数。现在的问题是，我们能否绕过 $p_{\text{fut}}$ 直接求出 $\psi$ 。这也很容易，只需要代入：
 
 $$
 \psi_j (h_t)=\sum_h \phi_j(h)p_{\text{fut}}(h|h_t)=(1-\gamma)\phi_j(h_t)+\gamma\sum_h \phi_j(h)\left[ \sum_{h'}p_\pi(h'|h_t)\cdot {p_{\text{fut}}(h|h')}\right]
@@ -276,13 +276,13 @@ $$
 =(1-\gamma)\phi_j(h_t)+\gamma\sum_{h'}p_\pi(h'|h_t)\psi_j(h')
 $$
 
-这样，新的递推关系就建立起来了，而且形式也和原来类似。我们依此可以类似Q-learning的算法得到$\psi$。
+这样，新的递推关系就建立起来了，而且形式也和原来类似。我们依此可以类似Q-learning的算法得到 $\psi$ 。
 
-> Q: 你的这个方法，递推关系都和Q learning是一样的，而且还不是学习一个Q函数而是$N$个这样的$\psi$函数。那为什么还要用你这个方法来计算Q function，而不是直接使用Q learning呢？
+> Q: 你的这个方法，递推关系都和Q learning是一样的，而且还不是学习一个Q函数而是 $N$ 个这样的 $\psi$ 函数。那为什么还要用你这个方法来计算Q function，而不是直接使用Q learning呢？
 >
-> A: 这是因为$\phi$相当于为我们提取好了特征，进而模型拟合$\psi$的难度比直接拟合$Q$小得多。
+> A: 这是因为 $\phi$ 相当于为我们提取好了特征，进而模型拟合 $\psi$ 的难度比直接拟合 $Q$ 小得多。
 >
-> 设想我们现在的$s_t$就是一张图片，那么$\phi(s)$的$N$个分量可以选为一个强大的CNN输出的$N$个feature。那么，在这些feature上面学习（建立递推式），显然比直接学习一些reward $r(s_t,a_t)$更容易。比如，一个游戏的页面上，可能到处是子弹、金币、和鲜血。这些每一个因素都可能贡献在reward里面。原先的模型要想学会好的Q，必须理解这些特征之间的复杂关系；而现在，预训练好的$\phi$已经帮我们提取出来了，第一个特征就代表金币在图片中的“强度”，第二个就代表子弹的“强度”，等等。这样，我们的$N$个模型就可以各司其职：第一个就学习金币对reward的影响，等等。这样，完成拟合的任务就容易了许多。
+> 设想我们现在的 $s_t$ 就是一张图片，那么 $\phi(s)$ 的 $N$ 个分量可以选为一个强大的CNN输出的 $N$ 个feature。那么，在这些feature上面学习（建立递推式），显然比直接学习一些reward $r(s_t,a_t)$ 更容易。比如，一个游戏的页面上，可能到处是子弹、金币、和鲜血。这些每一个因素都可能贡献在reward里面。原先的模型要想学会好的Q，必须理解这些特征之间的复杂关系；而现在，预训练好的 $\phi$ 已经帮我们提取出来了，第一个特征就代表金币在图片中的“强度”，第二个就代表子弹的“强度”，等等。这样，我们的 $N$ 个模型就可以各司其职：第一个就学习金币对reward的影响，等等。这样，完成拟合的任务就容易了许多。
 
 ## Utilizing Successor Representations
 
@@ -292,21 +292,21 @@ $$
 
 重复：
 
-1. 根据当前的策略$\pi$，使用上面的递推关系，类似Q-learning地训练$\psi_j$；
-2. 收集一系列和环境交互的数据$(s,a,r)$，训练参数矩阵$w$使得$|r(s,a)-\sum_j w_j\phi_j(s,a)|^2$被最小化；
-3. 利用$\psi$和$w$计算$Q(s,a)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (s,a)$。
-4. 根据$Q$更新policy。
+1. 根据当前的策略 $\pi$ ，使用上面的递推关系，类似Q-learning地训练 $\psi_j$ ；
+2. 收集一系列和环境交互的数据 $(s,a,r)$ ，训练参数矩阵 $w$ 使得 $|r(s,a)-\sum_j w_j\phi_j(s,a)|^2$ 被最小化；
+3. 利用 $\psi$ 和 $w$ 计算 $Q(s,a)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (s,a)$ 。
+4. 根据 $Q$ 更新policy。
 
-这个方法有点像policy iteration方法，只不过我们不再直接学习$Q$，而是学习了一个更加简单的$\psi$。但容易看出，我们这样做的成本还是比较高的，因为每一轮都要训练$N$个像Q function一样的东西。因此，也有另外一种的方法：
+这个方法有点像policy iteration方法，只不过我们不再直接学习 $Q$ ，而是学习了一个更加简单的 $\psi$ 。但容易看出，我们这样做的成本还是比较高的，因为每一轮都要训练 $N$ 个像Q function一样的东西。因此，也有另外一种的方法：
 
 > **Algorithm 2**
 
-1. 收集一系列和环境交互的数据$(s,a,r)$，训练参数矩阵$w$使得$|r(s,a)-\sum_j w_j\phi_j(s,a)|^2$被最小化；
+1. 收集一系列和环境交互的数据 $(s,a,r)$ ，训练参数矩阵 $w$ 使得 $|r(s,a)-\sum_j w_j\phi_j(s,a)|^2$ 被最小化；
 2. 选定很多很多个policy $\pi_1,\cdots,\pi_k$
-3. 对$i=1,\cdots,k$：
-    1. 根据当前的策略$\pi$，使用上面的递推关系，类似Q-learning地训练$\psi_j$；
-    2. 利用$\psi$和$w$计算$Q(s,a)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (s,a)$。
-4. 选出一个表现超过前面所有policy的policy $\pi^\star$。具体地，令
+3. 对 $i=1,\cdots,k$ ：
+    1. 根据当前的策略 $\pi$ ，使用上面的递推关系，类似Q-learning地训练 $\psi_j$ ；
+    2. 利用 $\psi$ 和 $w$ 计算 $Q(s,a)=\frac{1}{1-\gamma} \sum_j w_j\psi_j (s,a)$ 。
+4. 选出一个表现超过前面所有policy的policy $\pi^\star$ 。具体地，令
 
 $$
 \pi^\star(s)=\arg\max_a \max_i \sum_j w^{\pi_i}_j\psi^{\pi_i}_j(s,a) 
@@ -328,7 +328,7 @@ $$
 
 ## Extension to Continuous States
 
-前面我们的方法都基于学习一个概率函数$p_{\text{fut}}(h|h_t)$。但连续情况下，要学习的变成分布，问题就变得困难了起来。但我们可以采用一个技巧，这在DL的Word2Vec算法中也被使用。原先的$p_{\text{fut}}(h|h_t)$是一个多分类问题，我们把它**转化为二分类问题**：
+前面我们的方法都基于学习一个概率函数 $p_{\text{fut}}(h|h_t)$ 。但连续情况下，要学习的变成分布，问题就变得困难了起来。但我们可以采用一个技巧，这在DL的Word2Vec算法中也被使用。原先的 $p_{\text{fut}}(h|h_t)$ 是一个多分类问题，我们把它**转化为二分类问题**：
 
 $$
 p_{\text{fut}}(h|h_t)\to p(\text{Y}|h_t,h),p(\text{N}|h_t,h)
@@ -340,25 +340,25 @@ $$
 J(h_t)=\sum_{h\sim D_+}\log p(\text{Y}|h_t,h)+\sum_{h\sim D_-}\log p(\text{N}|h_t,h)
 $$
 
-其中$D_+$是正例数据集，理想情况下取样来自$p_{\text{fut}}(h|h_t)$；而$D_-$是负例数据集，理想情况下取样来自$h$的任意某个分布，比如就记作$p(h)$。为什么我们可以这样做呢？因为在这样的假设下，容易求得最优解满足
+其中 $D_+$ 是正例数据集，理想情况下取样来自 $p_{\text{fut}}(h|h_t)$ ；而 $D_-$ 是负例数据集，理想情况下取样来自 $h$ 的任意某个分布，比如就记作 $p(h)$ 。为什么我们可以这样做呢？因为在这样的假设下，容易求得最优解满足
 
 $$
 p(\text{Y}|h_t,h)=\frac{p_{\text{fut}}(h|h_t)}{p_{\text{fut}}(h|h_t)+kp(h)}
 $$
 
-其中$k=\frac{|D_-|}{|D_+|}$。这样，从这个分类器，我们就可以recover出原始分布
+其中 $k=\frac{|D_-|}{|D_+|}$ 。这样，从这个分类器，我们就可以recover出原始分布
 
 $$
 p_{\text{fut}}(h|h_t)=C(h)\cdot \frac{p(\text{Y}|h_t,h)}{1-p(\text{Y}|h_t,h)}
 $$
 
-其中$C(h)$不依赖$h_t$。这个常数影响并不大，因为比如说，我们要处理
+其中 $C(h)$ 不依赖 $h_t$ 。这个常数影响并不大，因为比如说，我们要处理
 
 $$
 \arg\max_{a_t} Q^\pi(h_t)=\arg\max_{a_t}\frac{1}{1-\gamma}\sum_h r(h)p_{\text{fut}}(h|h_t)
 $$
 
-那么$C(h)$就没有影响。这一思想被应用到所谓**C-learning**（C for classifier）中。但C-learning的算法[本身](https://arxiv.org/abs/2011.08909)比较复杂（涉及到Goal-conditioned learning），这里就不再展开了。
+那么 $C(h)$ 就没有影响。这一思想被应用到所谓**C-learning**（C for classifier）中。但C-learning的算法[本身](https://arxiv.org/abs/2011.08909)比较复杂（涉及到Goal-conditioned learning），这里就不再展开了。
 
 # Reference Papers
 

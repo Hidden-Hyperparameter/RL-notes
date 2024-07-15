@@ -10,22 +10,22 @@
 
 ## Imagining Goals
 
-怎样在没有reward的时候也完成训练呢？一个重要的方法是"Imagine goals"。这一方法引入一个VAE，对于观察到的state $s$通过 encoder $q_\phi$到达latent variable $z$，而$z$通过decoder $p_\theta$到达state $s'$。此外，还要训练一个policy $\pi(a|x,x_g)$。在这样的构造下，大致流程如下：
+怎样在没有reward的时候也完成训练呢？一个重要的方法是"Imagine goals"。这一方法引入一个VAE，对于观察到的state $s$ 通过 encoder $q_\phi$ 到达latent variable $z$ ，而 $z$ 通过decoder $p_\theta$ 到达state $s'$ 。此外，还要训练一个policy $\pi(a|x,x_g)$ 。在这样的构造下，大致流程如下：
 
 > **Imagining Goals**
 
-1. 在latent space随机采样作为目标：$z_g\sim p(z)$，然后通过decoder生成目标state：$x_g\sim p_\theta(x_g|z_g)$；
-2. 按照现有的policy $\pi(a|x,x_g)$来收集rollout，得到最终的state $\bar{x}$（最终理想上，我们希望$\bar{x}=x_g$）；
-3. 利用现在的数据训练$\pi$；
-4. 把$\bar{x}$加入数据集来训练VAE。
+1. 在latent space随机采样作为目标： $z_g\sim p(z)$ ，然后通过decoder生成目标state： $x_g\sim p_\theta(x_g|z_g)$ ；
+2. 按照现有的policy $\pi(a|x,x_g)$ 来收集rollout，得到最终的state $\bar{x}$ （最终理想上，我们希望 $\bar{x}=x_g$ ）；
+3. 利用现在的数据训练 $\pi$ ；
+4. 把 $\bar{x}$ 加入数据集来训练VAE。
 
-但这一方法有一定的问题。具体来说，因为VAE的训练数据是历史上出现过的所有state，所以从latent space中任意取出$z$，训练出来的大概率也和见过的state差别不大。解决方案是，我们强制鼓励VAE生成一些反常的数据。具体地，我们修改MLE的训练方式
+但这一方法有一定的问题。具体来说，因为VAE的训练数据是历史上出现过的所有state，所以从latent space中任意取出 $z$ ，训练出来的大概率也和见过的state差别不大。解决方案是，我们强制鼓励VAE生成一些反常的数据。具体地，我们修改MLE的训练方式
 
 $$
 \log p_\theta(\bar{x})\to p_\theta(\bar{x})^\alpha \cdot \log p_\theta(\bar{x})
 $$
 
-其中$\alpha \in (-1,0)$。这一方法被称为“skew-fit”，也有些像前面的count-based exploration的方法（还记得当时我们把经过次数$N(s)$的$-\frac{1}{2}$次方作为bonus）。理论上，可以给出，这样的方法最后得到的分布会扩散到完全均匀，也就是$\mathcal{H}(p_\theta(x))$最大。
+其中 $\alpha \in (-1,0)$ 。这一方法被称为“skew-fit”，也有些像前面的count-based exploration的方法（还记得当时我们把经过次数 $N(s)$ 的 $-\frac{1}{2}$ 次方作为bonus）。理论上，可以给出，这样的方法最后得到的分布会扩散到完全均匀，也就是 $\mathcal{H}(p_\theta(x))$ 最大。
 
 > 你也可能会奇怪：我们生成这样的一个均匀分布有什么意义呢？这里必须注意到，这个均匀分布是在所有**valid state**上面的均匀分布！换句话说，如果state以一个图像的形式呈现，那么这个分布并不是对于每一个pixel的均匀分布，而是整体一切在该环境内有意义的图像的均匀分布。
 
@@ -35,7 +35,7 @@ $$
 \mathcal{H}(p_{\text{VAE}}(g))
 $$
 
-也就是，所有可能的goal构成的集合$G$中的每个元素都在我们的VAE中以等概率出现。但与此同时，我们的模型也在做一些事情：如果我们用$\tilde{p}(g|\bar{x})$表示已知在我们的模型最后停在$\bar{x}$的时候，实际目标是$g$的概率，那么我们的模型就是让这一概率分布的熵尽量小（比如，在最理想情况下，看到$\bar{x}$就可以立刻给出$g$是什么）。同时，在我们的方法下，这一分布的posterior就是$p_{\text{VAE}}(g)$。因此，整体的目标可以形式上写成
+也就是，所有可能的goal构成的集合 $G$ 中的每个元素都在我们的VAE中以等概率出现。但与此同时，我们的模型也在做一些事情：如果我们用 $\tilde{p}(g|\bar{x})$ 表示已知在我们的模型最后停在 $\bar{x}$ 的时候，实际目标是 $g$ 的概率，那么我们的模型就是让这一概率分布的熵尽量小（比如，在最理想情况下，看到 $\bar{x}$ 就可以立刻给出 $g$ 是什么）。同时，在我们的方法下，这一分布的posterior就是 $p_{\text{VAE}}(g)$ 。因此，整体的目标可以形式上写成
 
 $$
 J=\mathcal{H}(\tilde{p}(g))-\mathcal{H}(\tilde{p}(g|\bar{x}))
@@ -69,13 +69,13 @@ $$
 
 ## State Marginal Matching (SMM)
 
-另外一个新的方法是，我们考虑一个更加一般的问题。我们的目标是最后state marginal是某个给定的$p^\star(s)$，也就是
+另外一个新的方法是，我们考虑一个更加一般的问题。我们的目标是最后state marginal是某个给定的 $p^\star(s)$ ，也就是
 
 $$
 p_\pi(s)\approx p^\star(s)
 $$
 
-其中$p_\pi(s)$代表按照当前的策略，在任何时候到达$s$的概率。这样，只要把$p^\star(s)$选取为均匀分布，就可以实现exploration；而如果稍微调整这一分布，就可以实现某种“定向”的exploration。
+其中 $p_\pi(s)$ 代表按照当前的策略，在任何时候到达 $s$ 的概率。这样，只要把 $p^\star(s)$ 选取为均匀分布，就可以实现exploration；而如果稍微调整这一分布，就可以实现某种“定向”的exploration。
 
 那么如何实现这样复杂的操作呢？直观上，我们可以类比上一讲提到的count-based exploration的方法，给每一个state一个bonus：
 
@@ -89,27 +89,27 @@ $$
 \mathbb{E}_{s\sim p_\pi(s)}[\tilde{r}(s)]=-\text{KL}(p_\pi(s)||p^\star(s))
 $$
 
-因此，一个合适的训练可以使得$p_\pi(s)$逼近$p^\star(s)$。这一方法被称为“State Marginal Matching”。
+因此，一个合适的训练可以使得 $p_\pi(s)$ 逼近 $p^\star(s)$ 。这一方法被称为“State Marginal Matching”。
 
-此外，需要注意现在的假设中，训练时我们得不到reward，因此总的“人造reward” $\tilde{r}(s)$中没有原来的reward项。同时，注意$p_\pi(s)$这一分布并非显然，一般需要用一个模型来拟合。考虑了这些后，我们可以得到一个训练流程：不断重复
+此外，需要注意现在的假设中，训练时我们得不到reward，因此总的“人造reward” $\tilde{r}(s)$ 中没有原来的reward项。同时，注意 $p_\pi(s)$ 这一分布并非显然，一般需要用一个模型来拟合。考虑了这些后，我们可以得到一个训练流程：不断重复
 
-1. 根据$\tilde{r}(s)$来训练$\pi$；
-2. 根据$\pi$获得的轨迹数据来update $p_\pi(s)$。
+1. 根据 $\tilde{r}(s)$ 来训练 $\pi$ ；
+2. 根据 $\pi$ 获得的轨迹数据来update $p_\pi(s)$ 。
 
 但这一方法有一个比较隐秘的问题。具体的细节很复杂，可以参考[这里](https://arxiv.org/abs/1906.05274)。但我们可以给出一个比较直观的解释。
 
 ![](./assets/14-1.jpeg)
 
-如图，假设我们的$p^\star$是橙色的均匀分布，一开始的时候，$p_{\pi_1}$和$\pi_1$在左下角的区域，$p_{\pi_1}$近似了$\pi_1$的state marginal（图中的绿色），而蓝色代表某一条具体的轨迹。这样，根据reward的选择，我们就会特别倾向于走向一些没有被绿色覆盖的部分，比如运动到图示$\pi_2$的区域。然后，1,3,4这三个区域就又没有被覆盖，因此我们可能到达它们中的任何一个。这样，我们发现，我们的策略可能一直在乱跳，而不是完全地覆盖。
+如图，假设我们的 $p^\star$ 是橙色的均匀分布，一开始的时候， $p_{\pi_1}$ 和 $\pi_1$ 在左下角的区域， $p_{\pi_1}$ 近似了 $\pi_1$ 的state marginal（图中的绿色），而蓝色代表某一条具体的轨迹。这样，根据reward的选择，我们就会特别倾向于走向一些没有被绿色覆盖的部分，比如运动到图示 $\pi_2$ 的区域。然后，1,3,4这三个区域就又没有被覆盖，因此我们可能到达它们中的任何一个。这样，我们发现，我们的策略可能一直在乱跳，而不是完全地覆盖。
 
 如何解决这一问题？实际上的解决方案来自于game theory。这一思路指出，我们可以这样修改该算法：
 
 > **State Marginal Matching**
 
 1. 重复
-    1. 根据$\tilde{r}(s)$来训练$\pi$；
-    2. 根据**历史上所有的轨迹数据**来update $p_\pi(s)$。
-2. **不返回最后的$\pi$，而是返回历史上所有$\pi$的平均**。
+    1. 根据 $\tilde{r}(s)$ 来训练 $\pi$ ；
+    2. 根据**历史上所有的轨迹数据**来update $p_\pi(s)$ 。
+2. **不返回最后的 $\pi$ ，而是返回历史上所有 $\pi$ 的平均**。
 
 在Game theory上证明了，这样可以保证这一方法收敛，并且到达state marginal matching的目标。实验上，这一方法确实可以在target state distribution均匀的时候做到非常均匀的explore。
 
@@ -119,15 +119,15 @@ $$
 \mathcal{H}(p_\pi(g))
 $$
 
-其中$g$还是代表任何一个goal state。可以看到，这和之前Imagining Goals的思想还是类似的，我们还是限定一个所有可能的goal的集合，然后让模型的最终行为可以均匀地到达这一集合中的任何一个goal。
+其中 $g$ 还是代表任何一个goal state。可以看到，这和之前Imagining Goals的思想还是类似的，我们还是限定一个所有可能的goal的集合，然后让模型的最终行为可以均匀地到达这一集合中的任何一个goal。
 
 ## Theoretical Consideration: why maximize entropy?
 
 一个有意思的问题是，为什么我们前面给出的两种方法，都最后落实到了最大化熵上？实际上，我们即将指出，最大化熵是理论上最好的方案。
 
-我们想像这样一种情景：回到开始的例子，机器人被放入一个环境中，里面有很多技能可能需要练习。在训练的过程中，机器人并不知道最后的目标，也得不到任何reward。但最后，测试的时候我们选取**机器人表现最差的任务**进行测试。在这样的情况下，机器人最理想的训练过程中goal的分布$p(g)$（$g\in G$）是什么呢？
+我们想像这样一种情景：回到开始的例子，机器人被放入一个环境中，里面有很多技能可能需要练习。在训练的过程中，机器人并不知道最后的目标，也得不到任何reward。但最后，测试的时候我们选取**机器人表现最差的任务**进行测试。在这样的情况下，机器人最理想的训练过程中goal的分布 $p(g)$ （ $g\in G$ ）是什么呢？
 
-理论上可以证明，训练数据的分布$p$使得熵最大的时候，机器人在最差情况下的表现最好。这也很直观，严谨的分析可以参考[这里](https://arxiv.org/abs/1806.04640)。
+理论上可以证明，训练数据的分布 $p$ 使得熵最大的时候，机器人在最差情况下的表现最好。这也很直观，严谨的分析可以参考[这里](https://arxiv.org/abs/1806.04640)。
 
 # Exploration by Skills
 
@@ -135,13 +135,13 @@ $$
 
 ![](./assets/14-2.png)
 
-具体地，不同的skill一般对应着state space中不同的区域，而它们最好能覆盖整个state space，如上面的图所示。如何实现这一点呢？我们选取我们的policy为$\pi(a|s,z)$，其中$z$代表某个skill。我们的目标则是最大化
+具体地，不同的skill一般对应着state space中不同的区域，而它们最好能覆盖整个state space，如上面的图所示。如何实现这一点呢？我们选取我们的policy为 $\pi(a|s,z)$ ，其中 $z$ 代表某个skill。我们的目标则是最大化
 
 $$
 J=\sum_z \mathbb{E}_{s\sim \pi(s|z)}[\log p_D(z|s)]
 $$
 
-其中$p_D$代表某种discrimitive model，它也在训练，理想状况下它应该可以通过state就确定下来在哪一个skill上，因为我们提到不同的skill对应的是state space的不同区域。换句话说，上面的目标就是让我们的policy对于每一个skill都作出不同的action，到达不同的state。
+其中 $p_D$ 代表某种discrimitive model，它也在训练，理想状况下它应该可以通过state就确定下来在哪一个skill上，因为我们提到不同的skill对应的是state space的不同区域。换句话说，上面的目标就是让我们的policy对于每一个skill都作出不同的action，到达不同的state。
 
 训练过程中，discrimitive model和policy都在训练；但和GAN不同，这里的两个模型并非对抗，而是相互辅助。就像下面的图那样，开始D可能只是随机画出一条分界线，但policy就会随着学会，最后自然分开不同skill对应的action。
 

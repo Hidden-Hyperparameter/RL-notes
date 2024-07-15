@@ -2,10 +2,10 @@
 
 先来回顾一下[Preliminaries](./0-preliminaries.md#preliminaries)中的内容，介绍一些符号——
 
-- $o_t$: observation at time $t$
-- $a_t$: action at time $t$
-- $s_t$: state at time $t$
-- $\pi_\theta(a_t|o_t)$：policy
+- $o_t$ : observation at time $t$
+- $a_t$ : action at time $t$
+- $s_t$ : state at time $t$
+- $\pi_\theta(a_t|o_t)$ ：policy
 
 什么是observation呢？这就引入了一个话题——我们有时候并不能观察到全部的state。
 
@@ -13,13 +13,13 @@
 
 在本笔记的绝大部分时候，我们总是可以忽略state和observation之间的差别；但有少数的情况，我们必须要区分它们，到时候会明确地说明。
 
-我们认为state是**完备的**。什么叫做完备？其实就是说，在已知$s_t$的时候，$s_{t-1}$不能提供关于$s_{t+1}$的更多信息。也就是
+我们认为state是**完备的**。什么叫做完备？其实就是说，在已知 $s_t$ 的时候， $s_{t-1}$ 不能提供关于 $s_{t+1}$ 的更多信息。也就是
 
 $$
 s_{t-1}\perp s_{t+1}|s_t
 $$
 
-满足这样的条件后，我们就可以发现，$s_{t+1}$只与$s_t,a_t$有关，而这又只和环境有关（注意和policy无关，因为$a_t$已经给出了）。这可以叫做dynamics，也可以叫做**transition probability**：
+满足这样的条件后，我们就可以发现， $s_{t+1}$ 只与 $s_t,a_t$ 有关，而这又只和环境有关（注意和policy无关，因为 $a_t$ 已经给出了）。这可以叫做dynamics，也可以叫做**transition probability**：
 
 $$
 s_{t+1}\sim p(s_{t+1}|s_t,a_t) \qquad (\text{determined by env})
@@ -41,7 +41,7 @@ $$
 $$
 \theta^\star = \argmax_{\theta}\log \pi_\theta(a=\pi^\star(s)|s)
 $$
-其中，$\pi^\star$ 是专家的策略。需要注意，这里完全没有RL的知识，只是普通的DL问题。这也有时候被叫做behavior cloning。
+其中， $\pi^\star$ 是专家的策略。需要注意，这里完全没有RL的知识，只是普通的DL问题。这也有时候被叫做behavior cloning。
 
 模型的实现可以是DL中的很多类型的网络。比如说CNN,VAE,甚至diffusion models。更进一步，有些研究考虑专家的Non-Markov性质，因此使用RNN来建模。当然，很多经验证明有“历史”的模型不一定比“无历史”的模型好。
 
@@ -55,25 +55,25 @@ $$
 下面给出了一些数学上的分析。它们的主要目的都是为了bound住behavior cloing的模型和专家之间的差距。
 
 ## Notations
-- $a=\pi^{\star}(s)$: the expert policy gives $a$ when the state is $s$
-- $\pi_\theta$: the policy we are trying to learn
-- $p_{\pi_\theta}(s_t)$: the probability of being at state $s_t$ at time $t$ if we follow $\pi_\theta$. 
-    - **重要提示**: $p_{\pi_\theta}(s_t)$的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。 的确——you are on the road :)
-- Use $|p_1-p_2|$ to denote the total variance distance between $p_1$ and $p_2$: $|p_1-p_2|=\sum_{x}|p_1(x)-p_2(x)|$
+- $a=\pi^{\star}(s)$ : the expert policy gives $a$ when the state is $s$
+- $\pi_\theta$ : the policy we are trying to learn
+- $p_{\pi_\theta}(s_t)$ : the probability of being at state $s_t$ at time $t$ if we follow $\pi_\theta$ . 
+    - **重要提示**: $p_{\pi_\theta}(s_t)$ 的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$ 的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。 的确——you are on the road :)
+- Use $|p_1-p_2|$ to denote the total variance distance between $p_1$ and $p_2$ : $|p_1-p_2|=\sum_{x}|p_1(x)-p_2(x)|$
 
 ## Distribution Distance
 **Assumptions.**
 
 - $\forall (a,s), \pi_\theta(a\ne \pi^{\star}(s)|s)\le \epsilon$
 
-**Conclusion**: 对任意的 $t$,
+**Conclusion**: 对任意的 $t$ ,
 
 $$
 \sum_{s_t}|p_{\pi_\theta}(s_t)-p_{\pi^{\star}}(s_t)|\le 2\epsilon t.
 $$
 
 
-**Proof**. **归纳**在这类问题是很常见的方法。我们试着把$t+1$时刻和$t$时刻的表达式联系起来：
+**Proof**. **归纳**在这类问题是很常见的方法。我们试着把 $t+1$ 时刻和 $t$ 时刻的表达式联系起来：
 
 $$
 \left|p_{\pi_\theta}(s_{t+1})-p_{\pi^\star}(s_{t+1})\right|=\left|\sum_{s_t,a_t}p(s_{t+1}|s_t,a_t)\pi_\theta(a_t|s_t)p_{\pi_\theta}(s_t)-\sum_{s_t}p(s_{t+1}|s_t,\pi^\star(s_t))p_{\pi^\star}(s_t)\right|.
@@ -91,7 +91,7 @@ $$
 =\epsilon+\epsilon \sum_{s_t}p_{\pi_\theta}(s_t)p(s_{t+1}|s_t,\pi^\star(s_t))+\sum_{s_t}p(s_{t+1}|s_t,\pi^\star(s_t))\left|p_{\pi_\theta}(s_t)-p_{\pi^\star}(s_t)\right|.
 $$
 
-对$s_{t+1}$求和即证。
+对 $s_{t+1}$ 求和即证。
 
 *Side Note.* Homework 1 的 Problem 1 实际上给出了一个弱化的条件，依然可以给出同样的结论：
 
@@ -159,7 +159,7 @@ $$
 \{(a_t|s_t,g_t=s_T)\}\in \mathcal{D}
 $$
 
-也就是说，我们模型知道了对于每一个 **目标$s_T$** 应该每一步怎样走。这样的操作也叫做 Goal-conditioned behavior cloning。
+也就是说，我们模型知道了对于每一个 **目标 $s_T$** 应该每一步怎样走。这样的操作也叫做 Goal-conditioned behavior cloning。
 
 ## DAgger
 

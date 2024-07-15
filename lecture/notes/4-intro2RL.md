@@ -8,7 +8,7 @@ $$
 \mathcal{M}=\{S,T\}
 $$
 
-其中，$S$被称为**state space**；$T$被称为**transition matrix**。 我们可以写出稳态的分布：
+其中， $S$ 被称为**state space**； $T$ 被称为**transition matrix**。 我们可以写出稳态的分布：
 $$
 p_{t+1}(s')=\sum_{s\in S}T(s',s)p_t(s)
 $$
@@ -21,7 +21,7 @@ $$
 \mathcal{M}=\{S,A,T,r\}
 $$
 
-其中，$S$是**state space**，$A$是**action space**，$T$是**transition matrix**。我们有
+其中， $S$ 是**state space**， $A$ 是**action space**， $T$ 是**transition matrix**。我们有
 
 $$
 p_{t+1}(s')=\sum_{s,a}T(s',s,a)p_t(s)p^{(A)}_t(a)
@@ -36,18 +36,18 @@ $$
 r(s,a)\in \mathbb{R}
 $$
 
-在 **Partially Observed MDP (POMDP)** 中，我们还必须引入**observation** $o_t$。但在接下来，我们均不考虑这一情况。
+在 **Partially Observed MDP (POMDP)** 中，我们还必须引入**observation** $o_t$ 。但在接下来，我们均不考虑这一情况。
 
 ## Goal
 
 我们的目标是最大化 **cumulative reward**:
 $$
-\theta^\star=\argmax_\theta \mathbb{E}_{\tau\sim p_\theta(\tau)}\left[\sum_{t=0}^T r(s_t,a_t)\right]
+\theta^\star=\arg\max_\theta \mathbb{E}_{\tau\sim p_\theta(\tau)}\left[\sum_{t=0}^T r(s_t,a_t)\right]
 $$
 
-其中 $\tau$ 代表轨迹 $(s_0,a_0,s_1,a_1,\ldots)$, $p_\theta(\tau)$ 代表在策略 $\pi_\theta$ 下得到该轨迹的概率。
+其中 $\tau$ 代表轨迹 $(s_0,a_0,s_1,a_1,\ldots)$ , $p_\theta(\tau)$ 代表在策略 $\pi_\theta$ 下得到该轨迹的概率。
 
-我们还希望把这一表达式扩展到$T=\infty$。(注意现在的情况中有些问题，因为$T\to \infty$时$\tau$ 的probability space趋于无限大。) 为此，定义 $p_{\theta}(s_t,a_t)$ ，它是在时间$t$获得 $(s_t,a_t)$的概率。 （注：参见第二讲**Notation**部分的重要注意事项，$p_\theta$ 对于不同的 $t$ 不是一个分布）
+我们还希望把这一表达式扩展到 $T=\infty$ 。(注意现在的情况中有些问题，因为 $T\to \infty$ 时 $\tau$ 的probability space趋于无限大。) 为此，定义 $p_{\theta}(s_t,a_t)$ ，它是在时间 $t$ 获得 $(s_t,a_t)$ 的概率。 （注：参见第二讲**Notation**部分的重要注意事项， $p_\theta$ 对于不同的 $t$ 不是一个分布）
 
 我们有
 $$
@@ -59,7 +59,7 @@ $$
 \theta^\star=\argmax_\theta \sum_{t=0}^T\mathbb{E}_{(s,a)\sim p_{\pi_\theta}(s_t,a_t)}\left[ r(s,a)\right]
 $$
 
-这以表达就很容易扩展到$T\to \infty$的时候了。
+这以表达就很容易扩展到 $T\to \infty$ 的时候了。
 
 
 ## Value Function and Q Function
@@ -80,7 +80,7 @@ $$
 Q^{\pi_\theta}(s_t,a_t)=r(s_t,a_t)+\sum_{i={t+1}}^T\mathbb{E}_{(s_i,a_i)\sim p_{\pi_\theta}(s_i,a_i|s_{t},a_{t})}\left[ r(s_i,a_i)\right]
 $$
 
-（注意，这里还是一样的问题：如果$T$有限，那么$Q^{\pi_\theta}(\cdot,\cdot)$对于不同的 $t$很可能不是一个函数，但这一点从记号上没有显示出来。可以发现很多RL的记号都存在这种问题，需要自己意会。）
+（注意，这里还是一样的问题：如果 $T$ 有限，那么 $Q^{\pi_\theta}(\cdot,\cdot)$ 对于不同的 $t$ 很可能不是一个函数，但这一点从记号上没有显示出来。可以发现很多RL的记号都存在这种问题，需要自己意会。）
 
 和**Value Function**：
 
@@ -94,7 +94,7 @@ $$
 J=\mathbb{E}_{s_0\sim p(s_0)}\left[V^{\pi_\theta}(s_0)\right]=\mathbb{E}_{(s_0,a_0)\sim p_{\pi_\theta}(s_0,a_0)}\left[Q^{\pi_\theta}(s_0,a_0)\right]
 $$
 
-此外，我们还有一个重要的，联系 $Q$ 和 $V$的关系：
+此外，我们还有一个重要的，联系 $Q$ 和 $V$ 的关系：
 
 $$
 Q^{\pi_\theta}(s_t,a_t)=r(s_t,a_t)+\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[V^{\pi_\theta}(s_{t+1})\right]
@@ -105,15 +105,15 @@ $$
 
 ### Planing with Q and V
 
-$Q,V$ 的重要性在于，它们可以很好地表达出我们的goal。换句话说，如果我们有了 $Q,V$，我们就可以优化policy。
+$Q,V$ 的重要性在于，它们可以很好地表达出我们的goal。换句话说，如果我们有了 $Q,V$ ，我们就可以优化policy。
 
-比如说，如果我们有$Q^{\pi}(s,a)$，我们就有一个最好的策略：
+比如说，如果我们有 $Q^{\pi}(s,a)$ ，我们就有一个最好的策略：
 
 $$
 \pi(a^\star,s)\leftarrow 1, a^\star=\argmax_a Q^{\pi}(s,a)
 $$
 
-除此之外，由于$V$是$Q$的期待值，我们也就知道我们的policy应该选择一个好的$a$，使得$Q(s,a)\ge V(s)$。这些直觉是很重要的，之后会讨论。
+除此之外，由于 $V$ 是 $Q$ 的期待值，我们也就知道我们的policy应该选择一个好的 $a$ ，使得 $Q(s,a)\ge V(s)$ 。这些直觉是很重要的，之后会讨论。
 
 
 # RL Algorithms Overview
@@ -131,7 +131,7 @@ $$
 | Policy Gradients| $J$ is sum of rewards | Gradient Descent on $J$ |
 | Value-based | Learn $V,Q$ of the **optimal policy** | Improve policy using $V,Q$ (with the intuition discussed above)|
 | Acter-Critic | Learn $V,Q$ of the **current policy** | Improve policy using $V,Q$ |
-| Model-based | Learn $f_\phi$, $s_{t+1}=f_\phi(s_t,a_t)$ (Simulate the env) | Backprop onto $\pi_\theta$ using $f_\phi$ |
+| Model-based | Learn $f_\phi$ , $s_{t+1}=f_\phi(s_t,a_t)$ (Simulate the env) | Backprop onto $\pi_\theta$ using $f_\phi$ |
 
 ## Tradeoff
 

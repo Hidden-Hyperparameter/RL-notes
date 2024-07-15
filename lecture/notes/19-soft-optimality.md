@@ -25,33 +25,33 @@
 
 ![](./assets/19-1.png)
 
-我们建立这样一个graphical model。所谓graphical model，就是指每一条线代表一个依赖关系。比如，$s_2$依赖于$s_1,a_1$，且依赖关系就是$s_2\sim p(s_{2}|s_1,a_1)$这一转移概率。
+我们建立这样一个graphical model。所谓graphical model，就是指每一条线代表一个依赖关系。比如， $s_2$ 依赖于 $s_1,a_1$ ，且依赖关系就是 $s_2\sim p(s_{2}|s_1,a_1)$ 这一转移概率。
 
-需要注意，图中的$O$并不是observation，而是我们引入的重要变量——**Optimalty**。它是一个布尔变量，**大致**代表这一步是不是作出“优的”决策（这一概念比较玄乎，需要慢慢体会）。$p(O_t|s_t,a_t)$ 是一个未知的概率分布，但是我们假设它对于不同的$t$是同一个函数形式。我们据此**重定义 reward**：
+需要注意，图中的 $O$ 并不是observation，而是我们引入的重要变量——**Optimalty**。它是一个布尔变量，**大致**代表这一步是不是作出“优的”决策（这一概念比较玄乎，需要慢慢体会）。 $p(O_t|s_t,a_t)$ 是一个未知的概率分布，但是我们假设它对于不同的 $t$ 是同一个函数形式。我们据此**重定义 reward**：
 
 $$
 r(s_t,a_t)=\log p(O_t=1|s_t,a_t)
 $$
 
-最后，我们需要建模的对象是$p(\tau|O_{1,...,T}=\text{True})$。这里注意，我们设置$O_{1,...,T}=\text{True}$，是因为我们模拟的基本原则还是尽可能作出“优的”决策。
+最后，我们需要建模的对象是 $p(\tau|O_{1,...,T}=\text{True})$ 。这里注意，我们设置 $O_{1,...,T}=\text{True}$ ，是因为我们模拟的基本原则还是尽可能作出“优的”决策。
 
-> Q: 等等，什么玩意，如果让$O_{1,...,T}=\text{True}$，不就是一直做最优的决策，那策略不就确定了吗？
+> Q: 等等，什么玩意，如果让 $O_{1,...,T}=\text{True}$ ，不就是一直做最优的决策，那策略不就确定了吗？
 >
-> A: 你理解的不够准确，这里确实比较抽象。$O_t=1$**并不代表这一步作出的$a_t$在$s_t$下是最优的**。相反，从表达式 $\log p(O_t=1|s_t,a_t)=\exp r(s_t,a_t)$来看，我们也可以看出$O_t=1$和$s_t,a_t$是“最优的”**没有必然的关系**，它们都是以概率的形式出现的。
+> A: 你理解的不够准确，这里确实比较抽象。 $O_t=1$**并不代表这一步作出的 $a_t$ 在 $s_t$ 下是最优的**。相反，从表达式 $\log p(O_t=1|s_t,a_t)=\exp r(s_t,a_t)$ 来看，我们也可以看出 $O_t=1$ 和 $s_t,a_t$ 是“最优的”**没有必然的关系**，它们都是以概率的形式出现的。
 >
-> Q: 你完全把我搞晕了。那这个$O_t$到底是什么？
+> Q: 你完全把我搞晕了。那这个 $O_t$ 到底是什么？
 >
 > A: 其实，如果你不深究，直接按照我们给出的概率和假设来计算也不错。但如果你要深究的话，我们给出的graphical model实际上是一个[Hidden Markov Model(HMM)](https://en.wikipedia.org/wiki/Hidden_Markov_model)。通俗地讲，HMM是一种模型，它认为可观测的变量由一个隐藏的Markov Process的状态决定，而这个Markov Process的状态是不可观测的。HMM的目的就是根据可观测变量尽可能地推测一些关于隐藏变量的信息。
 >
-> 在这里，$O_t$就对应着可观测变量；不即如此，观测到的所有数据（即我们的模型跑出的trajectory）里，$O_t$都是1。我们的目标就是given了$O_t$都是1,计算trajectory的条件概率，$p(\tau|O_{1...T})$。
+> 在这里， $O_t$ 就对应着可观测变量；不即如此，观测到的所有数据（即我们的模型跑出的trajectory）里， $O_t$ 都是1。我们的目标就是given了 $O_t$ 都是1,计算trajectory的条件概率， $p(\tau|O_{1...T})$ 。
 >
-> Q: 不是，那你把$O_t$都取成1,这一变量还有什么用呢？
+> Q: 不是，那你把 $O_t$ 都取成1,这一变量还有什么用呢？
 >
-> A: 这你说的就不对了。比如说，如果不给定这个全是1的条件，在只given $s_{1..t-1},a_{1..t-1}$ 的情况下，$a_t$和$s_t$是完全独立的变量；但现在，绝对不是这样。
+> A: 这你说的就不对了。比如说，如果不给定这个全是1的条件，在只given $s_{1..t-1},a_{1..t-1}$ 的情况下， $a_t$ 和 $s_t$ 是完全独立的变量；但现在，绝对不是这样。
 >
-> 换句话说，HMM的特点就是，因为观察到了可观测变量，导致隐藏变量的transition probability发生了改变。**而我们通过取可观测变量的$O_t$以某种方式依赖于trajectory，并且强行令$O_t=1$，就改变了trajectory的分布**：把它从完全没有约束时候的均匀分布，变到现在（至少我们希望）能够模拟猴子的trajectory的分布。
+> 换句话说，HMM的特点就是，因为观察到了可观测变量，导致隐藏变量的transition probability发生了改变。**而我们通过取可观测变量的 $O_t$ 以某种方式依赖于trajectory，并且强行令 $O_t=1$ ，就改变了trajectory的分布**：把它从完全没有约束时候的均匀分布，变到现在（至少我们希望）能够模拟猴子的trajectory的分布。
 
-接下来，我们可以来初步计算$p(\tau|O_{1,...,T}=\text{True})$：以下所有常数代表不依赖于$\tau$的常数。
+接下来，我们可以来初步计算 $p(\tau|O_{1,...,T}=\text{True})$ ：以下所有常数代表不依赖于 $\tau$ 的常数。
 
 $$
 p(\tau|O_{1...T}=1)=\frac{p(\tau,O_{1...T}=1)}{p(O_{1...T}=1)}
@@ -71,9 +71,9 @@ $$
 p(\tau)=p(s_1)p(a_1|s_1)p(s_2|s_1,a_1)p(a_2|s_2)p(s_3|s_2,a_2)\cdots
 $$
 
-是只与环境有关的概率。（这里$p(a_1|s_1)$等都是均匀的概率分布。）
+是只与环境有关的概率。（这里 $p(a_1|s_1)$ 等都是均匀的概率分布。）
 
-现在，考虑一个简化情况，我们会发现我们的模型确实合理：假设$p(\tau)$只是一些consistency check，也就是$p(s_{t+1}|s_t,a_t)$在$s_{t+1}$满足某些和$s_t,a_t$的关系时是均匀分布，否则是0。这样，前面的表达式就变成了
+现在，考虑一个简化情况，我们会发现我们的模型确实合理：假设 $p(\tau)$ 只是一些consistency check，也就是 $p(s_{t+1}|s_t,a_t)$ 在 $s_{t+1}$ 满足某些和 $s_t,a_t$ 的关系时是均匀分布，否则是0。这样，前面的表达式就变成了
 
 $$
 p(\tau|O_{1...T}=1)\propto \exp\left( \sum_{t} r(s_t,a_t)\right)
@@ -85,18 +85,18 @@ $$
 
 稍微理解了这一model在做什么之后，我们就可以把整个问题转化为一个概率问题（称为这个graphical model的**Inference**）：给定上面的graphical model，和概率分布
 
-- $p(s_{t+1}|s_t,a_t)$已知；
-- $p(O_t=1|s_t,a_t)=\exp r(s_t,a_t)$；
+- $p(s_{t+1}|s_t,a_t)$ 已知；
+- $p(O_t=1|s_t,a_t)=\exp r(s_t,a_t)$ ；
 
 我们的目标是来计算：
 
-- $\beta_t(s_t,a_t)=p(O_{t..T}=1|s_t,a_t)$，称为backward message；
-- $\pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)$，也就是policy；
-- $\alpha_t(s_t)=P(s_t|O_{1..{t-1}}=1)$，称为forward message。
+- $\beta_t(s_t,a_t)=p(O_{t..T}=1|s_t,a_t)$ ，称为backward message；
+- $\pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)$ ，也就是policy；
+- $\alpha_t(s_t)=P(s_t|O_{1..{t-1}}=1)$ ，称为forward message。
 
 其中第二条是我们最感兴趣的，也和我们的问题有关；而第一条和第三条是graphical model的术语，我们后面会看到它们的作用。
 
-在开始计算之前，我们首先声明：按照我们的graphical model，$a_t|s_t$**这一分布是均匀的**。对于这一分布不均匀的情况，也可以做类似的推导，但我们就不在这里讨论了。
+在开始计算之前，我们首先声明：按照我们的graphical model， $a_t|s_t$**这一分布是均匀的**。对于这一分布不均匀的情况，也可以做类似的推导，但我们就不在这里讨论了。
 
 #### Backward Message
 
@@ -106,7 +106,7 @@ $$
 \beta_t(s_t,a_t)=p(O_{t..T}=1|s_t,a_t)=\exp(r(s_t,a_t))\sum_{s_{t+1},a_{t+1}}p(s_{t+1}|s_t,a_t)p(a_{t+1}|s_{t+1})\beta_{t+1}(s_{t+1},a_{t+1})
 $$
 
-引入记号$\beta_t(s_t)=\mathbb{E}_{a_t\sim p(a_t|s_t)}[\beta_t(s_t,a_t)]$，有
+引入记号 $\beta_t(s_t)=\mathbb{E}_{a_t\sim p(a_t|s_t)}[\beta_t(s_t,a_t)]$ ，有
 
 $$
 \beta_t(s_t,a_t)=\exp(r(s_t,a_t))\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}[\beta_{t+1}(s_{t+1})]
@@ -128,13 +128,13 @@ $$
 V_t(s_t)= \log \mathbb{E}_{a_t\sim p(a_t|s_t)}[\exp Q_t(s_t,a_t)]
 $$
 
-注意，我们的$r(s_t,a_t)$并不是传统意义上的reward（在本讲不妨把传统意义上的reward记作$r_{c}$），而是通过前面的奇怪方式定义得到的。因此，我们也就知道了，当**我们选取**
+注意，我们的 $r(s_t,a_t)$ 并不是传统意义上的reward（在本讲不妨把传统意义上的reward记作 $r_{c}$ ），而是通过前面的奇怪方式定义得到的。因此，我们也就知道了，当**我们选取**
 
 $$
 \log p(O_t|s_t,a_t)=:r(s_t,a_t)\propto r_c(s_t,a_t)
 $$
 
-并且$r(s_t,a_t)\to \infty$的时候，我们这一graphical model给出的$\beta_t$具有一种“Q function”和“V function”的意思。当然，backup方程中并不是直接取最大值，而是取了一个`logsumexp`，这可以视作一种“软的”最大值，但softmax这一名词已经用过了，我们不妨管这一操作叫做 **“birdmax”**（注意，这个名词是我自己造的，不要用）。
+并且 $r(s_t,a_t)\to \infty$ 的时候，我们这一graphical model给出的 $\beta_t$ 具有一种“Q function”和“V function”的意思。当然，backup方程中并不是直接取最大值，而是取了一个`logsumexp`，这可以视作一种“软的”最大值，但softmax这一名词已经用过了，我们不妨管这一操作叫做 **“birdmax”**（注意，这个名词是我自己造的，不要用）。
 
 $$
 \text{BirdMax}(x)=\log \mathbb{E}_{x\sim p(x)}[e^x]
@@ -148,7 +148,7 @@ Q_t(s_t,a_t)=r(s_t,a_t)+\text{BirdMax}_{s_{t+1}}[V_{t+1}(s_{t+1})]
 V_t(s_t)=\text{BirdMax}_{a_t}[Q_t(s_t,a_t)]
 $$
 
-这是一个递推的方程，我们可以从$V_T(s_T)=0$开始，倒着计算出所有的$V_t(s_t)$和$Q_t(s_t,a_t)$。
+这是一个递推的方程，我们可以从 $V_T(s_T)=0$ 开始，倒着计算出所有的 $V_t(s_t)$ 和 $Q_t(s_t,a_t)$ 。
 
 #### Policy
 
@@ -158,7 +158,7 @@ $$
 \pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)=\frac{p(O_{1..T}=1|a_t,s_t)p(a_t|s_t)}{p(O_{1..T}=1|s_t)}
 $$
 
-注意到$p(O_{1..T}=1|a_t,s_t)=p(O_{1..t-1}=1)p(O_{t..T}=1|a_t,s_t)$，因此有：
+注意到 $p(O_{1..T}=1|a_t,s_t)=p(O_{1..t-1}=1)p(O_{t..T}=1|a_t,s_t)$ ，因此有：
 
 $$
 \pi_t(a_t|s_t)=\frac{1}{Z(s_t)}\beta_t(s_t,a_t)p(a_t|s_t)
@@ -178,13 +178,13 @@ $$
 
 也就是说，我们的policy是一个softmax形式的policy，其中logit就是advantage。如果你之前了解过[SAC(Soft Actor-Critic)](https://arxiv.org/abs/1801.01290)算法，你会发现这里的形式和SAC的形式是很像的；如果你不了解，也没有关系，因为SAC的一种理论来源就是这里。我们之后就会介绍SAC方法。
 
-当然，就如之前提到的那样，这里的$r(s_t,a_t)$和真实世界的reward $r_c(s_t,a_t)$并不相等，因此我们实际的应用中一般引入一个参数$\alpha$，给出
+当然，就如之前提到的那样，这里的 $r(s_t,a_t)$ 和真实世界的reward $r_c(s_t,a_t)$ 并不相等，因此我们实际的应用中一般引入一个参数 $\alpha$ ，给出
 
 $$
 \pi(a|s)\propto \exp\left(\frac{1}{\alpha}A_c(s,a)\right)
 $$
 
-其中$A_c$是传统的Q function $Q_c$和V function $V_c$的差值计算出的advantage。
+其中 $A_c$ 是传统的Q function $Q_c$ 和V function $V_c$ 的差值计算出的advantage。
 
 #### Forward Message
 
@@ -194,7 +194,7 @@ $$
 \alpha _t(s_t)=p(s_t|O_{1..t-1}=1)
 $$
 
-对于$\alpha$的递推，其实很难写出比较简洁的形式。我们类似地有
+对于 $\alpha$ 的递推，其实很难写出比较简洁的形式。我们类似地有
 
 $$
 \alpha_{t+1}(s_{t+1})=p(s_{t+1}|O_{1..t}=1)=\sum_{s_t,a_t}p(s_{t+1}|s_t,a_t)p(s_t,a_t|O_t=1,O_{1..t-1}=1)
@@ -208,7 +208,7 @@ $$
 =C\sum_{s_t,a_t}p(a_t|s_t)\cdot \exp(r(s_t,a_t))\cdot \alpha_t(s_t)\cdot p(s_{t+1}|s_t,a_t)
 $$
 
-按这个递推式理论上可以给出forward message的表达式。但实际上更重要（也更漂亮）的一个表达式，是$s_t$的state marginal：
+按这个递推式理论上可以给出forward message的表达式。但实际上更重要（也更漂亮）的一个表达式，是 $s_t$ 的state marginal：
 
 $$
 p(s_t|O_{1..T})=\frac{p(s_t|O_{1..t-1})p(O_{t..T}|s_t,O_{1..t-1})}{p(O_{t..T}|O_{1..t-1})}
@@ -218,7 +218,7 @@ $$
 =\frac{\alpha_t(s_t) p(O_{t..T}|s_t)}{p(O_{t..T}|O_{1..t-1})}\propto \alpha_t(s_t)\beta_t(s_t)
 $$
 
-我们可以思考这一表达式的含义，它实际上很有道理：backward message $\beta_t(s_t)$描述的是，在state $s_t$处向后看，作出的决策是“优的”的概率；而forward message $\alpha_t(s_t)$描述的是，一直做“优的”决策，到达$s_t$的概率。这二者结合起来，大概就刻画了$s_t$在整个“优”决策中的分布。
+我们可以思考这一表达式的含义，它实际上很有道理：backward message $\beta_t(s_t)$ 描述的是，在state $s_t$ 处向后看，作出的决策是“优的”的概率；而forward message $\alpha_t(s_t)$ 描述的是，一直做“优的”决策，到达 $s_t$ 的概率。这二者结合起来，大概就刻画了 $s_t$ 在整个“优”决策中的分布。
 
 ## Variational Inference of the Graphical Model
 
@@ -238,13 +238,13 @@ $$
 
 ![](./assets/19-2.jpeg)
 
-> 考虑一个流浪汉，他每天都会饿肚子，因此每天正常都有一个负的reward。我们考虑开始的一天（$s_1$），他发现一个售卖彩票的商店。如果买了彩票（记为$a_{1,1}$），那么他可能会付出额外的钱，因此这一天的reward为-150（$r(s_1,a_{1,1})=-150$）。但如果他不买彩票（记为$a_{1,2}$），那么他就不会付出额外的钱，reward为-100（$r(s_1,a_{1,2})=-100$）。如果他买了彩票，第二天他会以99%的概率没有获得任何（$s_{2,1}$），他不管做什么（记这个没什么用的action为$a_2$）都会继续饿肚子（$r(s_{2,1},a_2)=-100$）；但他也有1%的概率中奖，他得以吃饱（$r(s_{2,2},a_2)=0$）。当然，如果他没有买彩票，那依然是饿肚子（$r(s_{2,3},a_2)=-100$）。
+> 考虑一个流浪汉，他每天都会饿肚子，因此每天正常都有一个负的reward。我们考虑开始的一天（ $s_1$ ），他发现一个售卖彩票的商店。如果买了彩票（记为 $a_{1,1}$ ），那么他可能会付出额外的钱，因此这一天的reward为-150（ $r(s_1,a_{1,1})=-150$ ）。但如果他不买彩票（记为 $a_{1,2}$ ），那么他就不会付出额外的钱，reward为-100（ $r(s_1,a_{1,2})=-100$ ）。如果他买了彩票，第二天他会以99%的概率没有获得任何（ $s_{2,1}$ ），他不管做什么（记这个没什么用的action为 $a_2$ ）都会继续饿肚子（ $r(s_{2,1},a_2)=-100$ ）；但他也有1%的概率中奖，他得以吃饱（ $r(s_{2,2},a_2)=0$ ）。当然，如果他没有买彩票，那依然是饿肚子（ $r(s_{2,3},a_2)=-100$ ）。
 >
 > （这个例子有点唐，主要是因为我们的reward必须不能超过0）。现在，我们可以按照前面的birdmax update方式计算一下这个环境下的Q function和V function。
 
 ![](./assets/19-3.jpeg)
 
-> 我们会发现，对于买彩票的action，虽然大概率第二天的reward是-100，期望上也基本是-100，但是其birdmax之后是$\log (0.99\times 10^{-100}+0.01\times 1)\approx -2$。这就导致，买彩票之后，Q function反而更高（-152）。并且，此时按照exponential advantage给出的policy有接近于1的概率买彩票！对于这位可怜的流浪汉，这显然是不合理的。
+> 我们会发现，对于买彩票的action，虽然大概率第二天的reward是-100，期望上也基本是-100，但是其birdmax之后是 $\log (0.99\times 10^{-100}+0.01\times 1)\approx -2$ 。这就导致，买彩票之后，Q function反而更高（-152）。并且，此时按照exponential advantage给出的policy有接近于1的概率买彩票！对于这位可怜的流浪汉，这显然是不合理的。
 
 我们仔细想一想，这一问题究竟来自于哪里？从数学公式上看，对不同state的birdmax过分高估了state的“潜能”，但这不够本质；本质实际上是，我们**过分地condition on了决策是“优”的这一事实**。
 
@@ -264,7 +264,7 @@ $$
 \pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)
 $$
 
-这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，转移概率不是$p(s_{t+1}|s_t,a_t,O_{1..T}=1)$，而是$p(s_{t+1}|s_t,a_t)$。
+这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，转移概率不是 $p(s_{t+1}|s_t,a_t,O_{1..T}=1)$ ，而是 $p(s_{t+1}|s_t,a_t)$ 。
 
 因此，我们的policy应该重新被选取。很自然地，我们选取它为残酷的事实下的最近似分布：
 
@@ -306,13 +306,13 @@ $$
 \text{ELBO}=\log p(x)-\text{KL}\left(q(z|x)||p(z|x)\right)
 $$
 
-而和之前不同的是，现在$\log p(x)$和我们要优化的东西无关，因此我们**只需要最大化ELBO**。这时，我们就可以用它的第二种表达形式：
+而和之前不同的是，现在 $\log p(x)$ 和我们要优化的东西无关，因此我们**只需要最大化ELBO**。这时，我们就可以用它的第二种表达形式：
 
 $$
 \text{ELBO}= \mathbb{E}_{z\sim q(z|x)}[\log p(x|z)]-\text{KL}(q(z|x)||p(z))
 $$
 
-这时，注意到$p(x|z)$是容易计算的：
+这时，注意到 $p(x|z)$ 是容易计算的：
 
 $$
 p(x|z)=p(O_1=1|s_1,a_1)p(O_2=1|s_2,a_2)\cdots=\exp\left(\sum_{t}r(s_t,a_t)\right)
@@ -330,7 +330,7 @@ $$
 \pi = \arg \max_{\pi} \mathbb{E}_{\tau\sim p_{\pi}(\tau)}\left[\sum_{t}r(s_t,a_t)-\log \frac{\pi(a_t|s_t)}{p(a_t|s_t)}\right]
 $$
 
-在$p(a_t|s_t)$均匀的假设下，这就变成了
+在 $p(a_t|s_t)$ 均匀的假设下，这就变成了
 
 $$
 \pi = \arg \max_{\pi} \mathbb{E}_{\tau\sim p_{\pi}(\tau)}\left[\sum_{t}r(s_t,a_t)+\mathcal{H}(\pi(\cdot|s_t))\right]
@@ -346,7 +346,7 @@ $$
 J=\mathbb{E}_{s_1\sim p(s_1)}\mathbb{E}_{a_1\sim \pi(a_1|s_1)}\left[r(s_1,a_1)-\log \pi(a_1|s_1)+\mathbb{E}_{s_2\sim p(s_2)}\mathbb{E}_{a_2\sim \pi(a_2|s_2)}\left[r(s_2,a_2)-\log \pi(a_2|s_2)+\cdots\right]\right]
 $$
 
-这样，我们可以像之前说的[LQR](./10-optimal_control_planning.md#lqr)一样，求解最优的policy。作为假设，我们认为我们的网络表现能力足够强，以至于given任意state $s$都可以随意选取$\pi(a|s)$。这样，对于$s_T$的最优policy就可以直接计算得到：
+这样，我们可以像之前说的[LQR](./10-optimal_control_planning.md#lqr)一样，求解最优的policy。作为假设，我们认为我们的网络表现能力足够强，以至于given任意state $s$ 都可以随意选取 $\pi(a|s)$ 。这样，对于 $s_T$ 的最优policy就可以直接计算得到：
 
 $$
 \pi(a_T|s_T)\propto \exp r(s_T,a_T)=\exp Q(s_T,a_T)
@@ -364,7 +364,7 @@ $$
 \pi(a_T|s_T)=\frac{\exp Q(s_T,a_T)}{\exp V(s_T)}p(a_T|s_T)
 $$
 
-接下来，我们再次递推。假设$t+1$时已经给出了最优的策略为
+接下来，我们再次递推。假设 $t+1$ 时已经给出了最优的策略为
 
 $$
 \pi(a_{t+1}|s_{t+1})=\frac{\exp \hat{Q}(s_{t+1},a_{t+1})}{\exp \hat{V}(s_{t+1})}p(a_{t+1}|s_{t+1})
@@ -376,7 +376,7 @@ $$
 \mathbb{E}_{a_{t+1}\sim \pi(a_{t+1}|s_{t+1})}\left[r(s_{t+1},a_{t+1})-\log \pi(a_{t+1}|s_{t+1})+\cdots\right]:=J_{t+1}=\hat{V}(s_{t+1})
 $$
 
-（这里扔掉了一些可能和 $\log p(a_{t+1}|s_{t+1})$ 相关的常数）其中$\hat{Q},\hat{V}$是某待定函数。这样，带回到$t$时，我们就可以得到$t$时刻的等效objective为
+（这里扔掉了一些可能和 $\log p(a_{t+1}|s_{t+1})$ 相关的常数）其中 $\hat{Q},\hat{V}$ 是某待定函数。这样，带回到 $t$ 时，我们就可以得到 $t$ 时刻的等效objective为
 
 $$
 J=\mathbb{E}_{s_t\sim p(s_t)}\mathbb{E}_{a_t\sim \pi(a_t|s_t)}\left[r(s_t,a_t)-\log \pi(a_t|s_t)+\mathbb{E}_{s_{t+1}}[\hat{V}(s_{t+1})]\right]
@@ -408,7 +408,7 @@ $$
 \pi(a_t|s_t)=\frac{\exp \left(\frac{\hat{Q}(s_t,a_t)}{\alpha }\right)}{\exp \left(\frac{\hat{V}(s_t)}{\alpha }\right)}p(a_t|s_t)
 $$
 
-（这里出于和之前说的一样的理由，一个temperature参数$\alpha$作为hyperparameter需要被引入。）
+（这里出于和之前说的一样的理由，一个temperature参数 $\alpha$ 作为hyperparameter需要被引入。）
 
 可以看到，这一迭代方式比较奇特——在Q算V的时候，我们用的是比较“软”的birdmax；而在V算Q的时候，我们直接使用期望值。这有点像是之前第一个版本的graphical model inference方法和普通的Q-V iteration方法的结合。普通的Q-V iteration不允许sub-optimal behavior的出现；graphical model inference方法出现严重的optimism问题；而这一方法结合了两者的优点，并且建立在坚实的理论依据上，给出了一个很好的解决方案。
 
@@ -436,18 +436,18 @@ SAC算法可以说是Q learning方法中最大名鼎鼎的一种（虽然我们�
 
 重复：
 
-1. 更新 Q function: $Q(s,a)\leftarrow r(s,a)+\gamma[Q(s',a')-\log \pi(a'|s')]$（当然，要采用target network等优化，和之前一样，不再赘述）；
-2. 使用 REINFORCE 或者 REPARAMETERIZE 来更新policy，objective为 $J=\mathbb{E}_{a\sim \pi(a|s)}[Q(s,a)-\log \pi(a|s)]$。
-    - 如果使用 REINFORCE，那么 fake loss 为$\hat{J}=\mathbb{E}_{a\sim \pi(a|s)}[\log \pi(a|s)Q(s,a)]+\mathcal{H}(a|s)$（这是对一组数据的梯度）；
+1. 更新 Q function: $Q(s,a)\leftarrow r(s,a)+\gamma[Q(s',a')-\log \pi(a'|s')]$ （当然，要采用target network等优化，和之前一样，不再赘述）；
+2. 使用 REINFORCE 或者 REPARAMETERIZE 来更新policy，objective为 $J=\mathbb{E}_{a\sim \pi(a|s)}[Q(s,a)-\log \pi(a|s)]$ 。
+    - 如果使用 REINFORCE，那么 fake loss 为 $\hat{J}=\mathbb{E}_{a\sim \pi(a|s)}[\log \pi(a|s)Q(s,a)]+\mathcal{H}(a|s)$ （这是对一组数据的梯度）；
     - 如果使用 REPARAMETERIZE，那么直接计算loss就可以了。
-    - 你可能会疑问，用 REINFORCE 怎么计算熵$\mathcal{H}$的梯度？实际上，也不是不可以，只需要把fake loss设置为$\frac{1}{2}\mathbb{E}_{a\sim \pi(a|s)}[(\log \pi(a|s))^2]$就可以了。当然，这看起来比较奇怪。实际上，REPARAMETERIZE的效果确实也更好。
+    - 你可能会疑问，用 REINFORCE 怎么计算熵 $\mathcal{H}$ 的梯度？实际上，也不是不可以，只需要把fake loss设置为 $\frac{1}{2}\mathbb{E}_{a\sim \pi(a|s)}[(\log \pi(a|s))^2]$ 就可以了。当然，这看起来比较奇怪。实际上，REPARAMETERIZE的效果确实也更好。
 3. 根据policy来收集数据。
 
-注意这一algorithm和之前的soft optimality给出的公式具有细微的差别：在update Q 的时候，我们不再单独使用birdmax计算$V$，因为在continous action space上很难计算出来；转而我们用$\log \pi$来估计$V$，这是普适的。当然，在discrete action上面，我们也可以使用birdmax。这一算法叫做 **“soft Q-learning”**：
+注意这一algorithm和之前的soft optimality给出的公式具有细微的差别：在update Q 的时候，我们不再单独使用birdmax计算 $V$ ，因为在continous action space上很难计算出来；转而我们用 $\log \pi$ 来估计 $V$ ，这是普适的。当然，在discrete action上面，我们也可以使用birdmax。这一算法叫做 **“soft Q-learning”**：
 
 > **Soft Q-learning**
 
-1. 更新 Q function: $Q(s,a)\leftarrow r(s,a)+\gamma\cdot \text{BirdMax}_{a_{t+1}}[Q(s_{t+1},a_{t+1})]$（当然，还是要采用target network等优化）；
+1. 更新 Q function: $Q(s,a)\leftarrow r(s,a)+\gamma\cdot \text{BirdMax}_{a_{t+1}}[Q(s_{t+1},a_{t+1})]$ （当然，还是要采用target network等优化）；
 2. 根据某种exploration policy来收集数据。
 
 SAC algorithm的效果十分显著。一方面，它训练出来的policy具有很强的**robustness**，因为entropy bonus鼓励policy四处探索，可以理解为它在各种方向上都有很好的解决方案。在实验上，用SAC训练出来的移动物品的机器人，即使人对它拳打脚踢导致它的机械臂移动了很远，当“攻击”结束后它依然能反应过来，继续完成任务。
