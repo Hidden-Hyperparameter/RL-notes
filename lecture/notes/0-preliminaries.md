@@ -1,3 +1,7 @@
+# New Update
+
+在全部笔记完工一个月后，我再次阅读之前的笔记时，发现存在着很多地方逻辑转折不是十分通顺。在修改原来笔记的同时，我也正在尝试建立一个更加自然的体系，这一体系放在[tutorial](./tutorial)文件夹下。如果感兴趣也可以参考一下。
+
 # General
 
 本仓库是我学习Berkeley的课程[CS285(DRL)](http://rail.eecs.berkeley.edu/deeprlcourse/)时候记录的自学笔记。

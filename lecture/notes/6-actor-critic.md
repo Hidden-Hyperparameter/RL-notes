@@ -12,9 +12,10 @@ $$
 但这个表达式具有比较大的variance。仔细一想，是因为对于每一次 $\hat{Q}^{\pi_\theta}_{n,t}$ 我们只计算一条轨迹，这会导致variance很大。请记住本讲的takeover：
 
 > **重要思想.** 对于很多问题，有两种方案：
+>
 > 1. 一个单采样的估计，虽然unbiased但方差大；
 > 2. 一个模型的拟合，虽然对不准确的model有一定bias，但方差小。
-> 
+>
 > 我们需要在这两者之间做一个tradeoff。
 
 本讲很多地方都要采用这种思想。比如这里，根据这个**重要思想**，我们希望把 $\hat{Q}^{\pi_\theta}_{n,t}$ 换成很多轨迹的期待值。
@@ -49,52 +50,59 @@ $$
 
 ## Fitting Q and V
 
-显然，既然引入了Q和V，我们就需要一个方法来估计 $Q$ 和 $V$ 。假设我们的算力只支持拟合一个网络，我们的神经网络拟合哪个比较好呢？
-
-我们注意到
+显然，既然引入了Q和V，我们就需要网络来估计 $Q$ 和 $V$ 。不过，我们一开始来想，并不希望同时引入两个网络来拟合，这是因为他们本身就有较简单的关系，而且我们也希望尽量减小算力的开销。不过，这很好实现，因为我们可以表达：
 
 $$
-Q^{\pi_\theta}(s_t,a_t)=r(s_t,a_t)+\mathbb{E}_{\tau_{> t} \sim p_{\bar{\theta}}(\tau_{> t}|s_t,a_t)}\left[\sum_{t'=t+1}^Tr(s_{t'},a_{t'})\right]
-=r(s_t,a_t)+\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}\left[V^{\pi_\theta}(s_{t+1})\right]
+Q^{\pi_\theta}(s_t,a_t)-V^{\pi_\theta}(s_t) = Q^{\pi_\theta}(s_t,a_t)-\mathbb{E}_{a_t\sim \pi_\theta(a_t|s_t)}\left[Q^{\pi_\theta}(s_t,a_t)\right]
 $$
 
-根据之前提到的**重要思想**：期待值虽然带来小的variance，但是需要多付出一个model（用来拟合 $Q$ ）的代价。因此，这里我们不如随机选取一个 $s_{t+1}$ ，然后直接用
+也可以写出
 
 $$
-Q^{\pi_\theta}(s_t,a_t)\approx r(s_t,a_t)+V^{\pi_\theta}(s_{t+1})
+Q^{\pi_\theta}(s_t,a_t)-V^{\pi_\theta}(s_t)= r(s_t,a_t)+\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_t,a_t)}[V^{\pi_\theta}(s_{t+1})]-V^{\pi_\theta}(s_t)
 $$
 
-显然这样的估计虽然unbiased但是variance很大。但这样我们完全可以不用再拟合 $Q$ ，所以作了很好的tradeoff。接下来，只需要拟合 $V$ 了。
+因此，无论是我们选择拟合 $Q$ 还是 $V$ ，我们都可以直接带入到之前的policy gradient带来的表达式中，进行训练。接下来，我们讨论的问题就是究竟拟合 $Q$ 还是 $V$ 了。
 
-### Policy Evaluation
-
-policy evaluation就是指拟合 $V$ 。问题的关键是如何收集用来拟合 $V$ 的数据。最简单的思路就是Monte Carlo：我们就利用每一条轨迹的reward来拟合 $V$ 。具体地，每次采样 $N$ 条轨迹，计算
+我们以$V$网络的拟合为例子。我们知道，$V^{\pi_\theta}(s_{n,t})$的目标是
 
 $$
 y_{n,t}=\sum_{t'=t}^Tr(s_{n,t'},a_{n,t'})
 $$
 
-然后训练
+一个自然的想法是，我们去训练
 
 $$
 L(\phi)=\frac{1}{N}\sum_{n=1}^N\sum_{t=1}^{T}\left(y_{n,t}-V^{\pi_\theta}_{\phi}(s_{n,t})\right)^2
 $$
 
-注意这里的 $V^{\pi_\theta}_{\phi}$ 是一个只依赖于参数 $\phi$ ，而不依赖于 $\theta$ 的网络。
-
-当然，容易看到这里 $y_{n,t}$ 又是一个单采样，所以variance很大。因此，根据前面的**重要思想**，我们可以利用模型的结果：
+但是问题是，这样相当于采集一堆单采样的样本当成训练数据，可以想象到方差依然很大，采样的数目也没有减少。一个重要的思想是，我们建立一个**递推关系**。比如现在，我们近似地给出
 
 $$
-{y}_{n,t}=r(s_{n,t},a_{n,t})+\sum_{t'=t+1}^Tr(s_{n,t'},a_{n,t'})\approx r(s_{n,t},a_{n,t})+V^{\pi_\theta}_{\phi}(s_{n,t+1}):=\hat{y}_{n,t}
+V^{\pi_\theta}(s_{n,t})\leftarrow y_{n,t}=\sum_{t'=t}^Tr(s_{n,t'},a_{n,t'})\approx r(s_{n,t},a_{n,t}) + \mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_{n,t},a_{n,t})}[V^{\pi_\theta}(s_{t+1})]
 $$
 
-这样，我们的目标变成了
+这样，我们就取得了巨大的飞跃：我们单采样的变量从一系列$a_{n,t},s_{n+1,t},\cdots$到只有一个$a_{n,t}$！这样，我们可以料想到我们的方差减少了；但是根据**重要思想**，我们对应的代价是target也包含我们正在训练的网络，因此增大了bias。
+
+类似地，对$Q$是不是也可以做一样的操作呢？我们发现可行：
+
+$$
+Q^{\pi_\theta}(s_{n,t},a_{n,t})\leftarrow r(s_{n,t},a_{n,t})+\mathbb{E}_{s_{t+1}\sim p(s_{t+1}|s_{n,t},a_{n,t}),a_{t+1}\sim \pi_\theta(a_{t+1}|s_{t+1})}[Q^{\pi_\theta}(s_{t+1},a_{t+1})]
+$$
+
+但是$Q$的缺点在于，我们可以发现，这里必须做两个采样（$s_{t+1}$和$a_{t+1}$），也就是方差会相对更大。
+
+因此，我们在这里选择**拟合 $V$**。
+
+### Policy Evaluation
+
+所谓Policy Evaluation就是指，我们根据一个policy 给出其对应的value function，进一步给出advantage。根据前面的讨论，$V$ 的目标变成了
 
 $$
 \hat{L}(\phi)=\frac{1}{N}\sum_{n=1}^N\sum_{t=1}^{T}\left(\text{SG}[\hat{y}_{n,t}]-V^{\pi_\theta}_{\phi}(s_{n,t})\right)^2=\frac{1}{N}\sum_{n=1}^N\sum_{t=1}^{T}\left(r(s_{n,t},a_{n,t})+\text{SG}[V^{\pi_\theta}_{\phi}(s_{n,t+1})]-V^{\pi_\theta}_{\phi}(s_{n,t})\right)^2
 $$
 
-（注意这里stop gradient，以稳定训练）这个最终的表达式就是我们的policy evaluation的目标。
+（注意这里stop gradient，原因根据我们的推理过程，前一个$V$是作为target出现，所以不应该被update，也就是这里我们就是一个简单的MSE loss。）这个最终的表达式就是我们的policy evaluation的训练目标。
 
 ## Summary
 
@@ -106,7 +114,7 @@ $$
 
 # Actor-Critic Algorithm
 
-把前面的方法总结一下，我们就得到了Actor-Critic算法：
+把前面的方法总结一下，我们就得到了**Actor-Critic算法**：
 
 1. 利用现在的policy $\pi_\theta$ 取 $N$ 个trajectory；
 2. 用这些数据训练 $V^{\pi_\theta}_{\phi}$ ；
@@ -133,8 +141,10 @@ $$
 这会带来很多地方的改变。
 
 > **小贴士**
-> 
-> 本讲有一些地方完全改变了原来的算法。为了保证理解，建议每一次这种地方都自己先思考一下引入的新修改会导致原来算法哪些部分的改变。比如这里：
+>
+> 本讲有一些地方完全改变了原来的算法。为了保证理解，建议每一次这种地方都自己先思考一下引入的新修改会导致原来算法哪些部分的改变，然后再看我们的解释。
+
+在这里：
 
 - $V^{\pi_\theta}_\phi$ 的训练要改变
 - $A^{\pi_\theta}(s_t,a_t)$ 的计算要改变
