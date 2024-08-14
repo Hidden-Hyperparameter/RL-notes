@@ -1,1 +1,4 @@
 gymnasium==0.29
+
+# fill in your torch version here, since installing torch takes a long time.
+torch

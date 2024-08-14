@@ -4,6 +4,7 @@ import numpy as np
 from IPython.display import Video, display
 from typing import List
 
+# display utils
 def show_image(image:np.ndarray):
     plt.imshow(image)
     plt.axis('off')
@@ -23,3 +24,11 @@ def show_video(frames:List[np.ndarray]):
     ani.save(video_path, writer='ffmpeg')
     plt.close(fig)
     display(Video(video_path, embed=True))
+
+# decorators
+
+def add_method_to_class(cls):
+    def decorator(func):
+        setattr(cls, func.__name__, func)
+        return func
+    return decorator
