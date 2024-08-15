@@ -1,6 +1,9 @@
 from IPython.display import Markdown,display_markdown
 from typing import List,Optional
-import torch
+import torch,random
+random.seed(42)
+torch.manual_seed(3407)
+torch.backends.cudnn.deterministic = True
 
 def display_table(cells):
     s = '|' + '|'.join(cells[0]) + '|\n'
@@ -84,8 +87,9 @@ class PixelGame:
         self.num_pixels = len(self.target_pixel_pos)
         self.reset()
 
-    def reset(self):
-        self.pos = [(0,0) for _ in range(self.num_pixels)]
+    def reset(self,randomly=False):
+        self.pos = [(0,0) for _ in range(self.num_pixels)] if not randomly else random.choices([(i,j) for i in range(10) for j in range(10)],k=self.num_pixels)
+        return self.pos
 
     def display(self,positions:Optional[List[tuple]] = None):
         if positions is None:
@@ -99,10 +103,13 @@ class PixelGame:
     def display_target(self):
         self.display(self.target_pixel_pos)
 
-    def get_reward(self,positions:Optional[List[tuple]] = None):
+    def get_common_pixels(self,positions):
         if positions is None:
             positions = self.pos
-        common = len(set(self.target_pixel_pos).intersection(set(positions)))
+        return len(set(self.target_pixel_pos).intersection(set(positions)))
+
+    def get_reward(self,positions:Optional[List[tuple]] = None):
+        common = self.get_common_pixels(positions)
         if common == self.num_pixels:
             return 100
         return (common-self.num_pixels)/(self.num_pixels * 10)
@@ -111,14 +118,14 @@ class PixelGame:
         if position is None:
             position = self.pos
         out = torch.zeros(10,10)
-        for pos in self.pos:
-            out[pos[0],pos[1]] = 1
+        for pos in position:
+            out[pos[0],pos[1]] += 1
         return out.float().unsqueeze(0) # add the channel dimension
     
     def get_actions(self,state):
-        return [(*pos,d) for pos in state for d in range(4)]
+        return [(*pos,d) for pos in set(state) for d in range(4)]
     
-    def get_transition(self,state,action):
+    def get_transition(self,state:List[tuple],action:tuple):
         """
         Since in this problem we have no uncertainties, we can just return the next state.
 
@@ -129,10 +136,14 @@ class PixelGame:
         x,y,d = action
         if (x,y) not in state:
             return state.copy()
-        new_state = [c for c in state if c != (x,y)]
+        i = state.index((x,y))
+        new_state = state[:i] + state[i+1:]
         dx,dy = Table.ACTIONS[d]['coord']
         if 0 <= x+dx < 10 and 0 <= y+dy < 10:
             new_state.append((x+dx,y+dy))
         else:
             new_state.append((x,y))
         return new_state
+
+    def set_state(self,state):
+        self.pos = state

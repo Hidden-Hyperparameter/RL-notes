@@ -4,6 +4,11 @@ import numpy as np
 from IPython.display import Video, display
 from typing import List
 
+device = 'cpu'
+# if torch.cuda.is_available(): device = 'cuda'
+# if torch.backends.mps.is_available(): device = 'mps'
+print('Your device is',device)
+
 # display utils
 def show_image(image:np.ndarray):
     plt.imshow(image)
