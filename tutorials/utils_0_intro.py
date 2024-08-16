@@ -134,6 +134,7 @@ class PixelGame:
         if self.get_reward(state) == 100:
             return None # terminal state
         x,y,d = action
+        assert isinstance(x,int) and isinstance(y,int) and isinstance(d,int)
         if (x,y) not in state:
             return state.copy()
         i = state.index((x,y))

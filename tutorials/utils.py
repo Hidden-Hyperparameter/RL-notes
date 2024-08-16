@@ -4,9 +4,12 @@ import numpy as np
 from IPython.display import Video, display
 from typing import List
 
+import torch
+torch.manual_seed(3407)
+torch.backends.cudnn.deterministic = True
 device = 'cpu'
-# if torch.cuda.is_available(): device = 'cuda'
-# if torch.backends.mps.is_available(): device = 'mps'
+if torch.cuda.is_available(): device = 'cuda'
+if torch.backends.mps.is_available(): device = 'mps'
 print('Your device is',device)
 
 # display utils
