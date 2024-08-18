@@ -1,4 +1,7 @@
+matplotlib
 gymnasium==0.29
+gymnasium[classic-control]
 
 # fill in your torch version here, since installing torch takes a long time.
-torch
+# torch
+tqdm
