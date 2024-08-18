@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
-from IPython.display import Video, display
+from IPython.display import Video, display, display_markdown, Markdown
 from typing import List
 
 import torch
@@ -19,7 +19,7 @@ def show_image(image:np.ndarray):
     plt.show()
     plt.close()
 
-def show_video(frames:List[np.ndarray]):
+def show_video(frames:List[np.ndarray],title=None):
     fig = plt.figure(figsize=(6, 4))
     plt.axis('off')
     im = plt.imshow(frames[0])
@@ -31,6 +31,7 @@ def show_video(frames:List[np.ndarray]):
     video_path = '/tmp/video.mp4'
     ani.save(video_path, writer='ffmpeg')
     plt.close(fig)
+    if title: display_markdown(Markdown(f'### {title}'))
     display(Video(video_path, embed=True))
 
 # decorators
