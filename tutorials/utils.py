@@ -8,8 +8,8 @@ import torch
 torch.manual_seed(3407)
 torch.backends.cudnn.deterministic = True
 device = 'cpu'
-if torch.cuda.is_available(): device = 'cuda'
-if torch.backends.mps.is_available(): device = 'mps'
+# if torch.cuda.is_available(): device = 'cuda'
+# if torch.backends.mps.is_available(): device = 'mps'
 print('Your device is',device)
 
 # display utils
@@ -34,10 +34,13 @@ def show_video(frames:List[np.ndarray],title=None):
     if title: display_markdown(Markdown(f'### {title}'))
     display(Video(video_path, embed=True))
 
-# decorators
+# ipynb utils
 
 def add_method_to_class(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
         return func
     return decorator
+
+def update_meth_to_obj(obj,meth_name:str):
+    setattr(obj, meth_name, lambda *args: getattr(obj.__class__,meth_name)(obj,*args))

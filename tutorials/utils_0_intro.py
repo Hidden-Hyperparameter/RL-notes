@@ -479,24 +479,30 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             pygame.quit()
             self.isopen = False
 
-def compare_videos(frame1:str,frame2:str,title1:str,title2:str):
-    fig = plt.figure(figsize=(12, 4))
-    sub1 = fig.add_subplot(1,2,1)
+def compare_videos(frame1, frame2, title1, title2):
+    fig = plt.figure(figsize=(12, 6))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 0.1])
+    sub1 = fig.add_subplot(gs[0, 0])
     sub1.axis('off')
-    # sub1.imshow(frame1)
     im1 = sub1.imshow(frame1[0])
     sub1.set_title(title1)
-    sub2 = fig.add_subplot(1,2,2)
+    
+    sub2 = fig.add_subplot(gs[0, 1])
     sub2.axis('off')
     im2 = sub2.imshow(frame2[0])
-    # sub2.imshow(frame2)
     sub2.set_title(title2)
-    def update(frame_pair):
-        im1.set_array(frame_pair[0])
-        im2.set_array(frame_pair[1])
-        return [im1,im2]
     
-    ani = animation.FuncAnimation(fig, update, frames=list(zip(frame1,frame2)), interval=50, blit=True)
+    frame_text = fig.text(0.5, 0.15, '', ha='center', va='center', fontsize=20, color='black', backgroundcolor='white')
+
+    def update(frame_pair):
+        frame_num, (frame_1, frame_2) = frame_pair
+        im1.set_array(frame_1)
+        im2.set_array(frame_2)
+        frame_text.set_position((0.5, 0.15)) # re-set the position so that the text can be displayed
+        frame_text.set_text(f'Frame: {frame_num}')
+        return [im1, im2, frame_text]
+
+    ani = animation.FuncAnimation(fig, update, frames=list(enumerate(zip(frame1, frame2))), interval=50, blit=False)
     video_path = '/tmp/video.mp4'
     ani.save(video_path, writer='ffmpeg')
     plt.close(fig)
