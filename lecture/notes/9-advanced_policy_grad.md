@@ -87,9 +87,9 @@ $$
 我们现在断言，如果
 
 $$
-|\pi_{\theta_1}(\cdot|s_t)-\pi_{\theta_0}(\cdot|s_t)|\le \epsilon
+|\pi_{\theta_1}(\cdot|s)-\pi_{\theta_0}(\cdot|s)|\le \epsilon
 $$
-（这里依然是total variation distance），那么写
+（这里依然是total variation distance）对任意 $s$ 成立，那么写
 
 $$
 J(\theta_1)-J(\theta_0)=\sum_{t=0}^{T-1}\gamma^t \mathbb{E}_{s_t\sim p_{\textcolor{red}{\theta_0}}(s_t)}\left[\mathbb{E}_{a_t\sim \pi_{\theta_0}(a_t|s_t)}\left[A^{\pi_{\theta_0}}(s_t,a_t)\frac{\pi_{\theta_1}(a_t|s_t)}{\pi_{\theta_0}(a_t|s_t)}\right]\right]
@@ -103,7 +103,7 @@ $$
 > 
 > **Maximize** $J(\theta_1)=\sum_{t=0}^{T-1}\gamma^t \mathbb{E}_{s_t\sim p_{{\theta_0}}(s_t)}\left[\mathbb{E}_{a_t\sim \pi_{\theta_0}(a_t|s_t)}\left[A^{\pi_{\theta_0}}(s_t,a_t)\frac{\pi_{\theta_1}(a_t|s_t)}{\pi_{\theta_0}(a_t|s_t)}\right]\right]$ w.r.t. $\theta_1$
 >
-> **With Constraint** $|\pi_{\theta_1}(\cdot|s_t)-\pi_{\theta_0}(\cdot|s_t)|\le \epsilon$
+> **With Constraint** $|\pi_{\theta_1}(\cdot|s)-\pi_{\theta_0}(\cdot|s)|\le \epsilon$, $\forall s$.
 
 现在，假设我们解决了这个优化问题，那么直观上我们就可以解决了原来的 $J(\theta_1)-J(\theta_0)$ 的优化问题：只要**不断地迭代**这个Little Step，我们就可以逐渐优化 $J(\theta)$ ！这有点像gradient step中限制了一个grad norm（做gradient clipping），使得每一步都只能走不超过一个距离，但是最终还是可以到达最优点。
 
@@ -120,10 +120,17 @@ $$
 这样，我们就可以把问题转化为约束在
 
 $$
-\text{KL}\left(\pi_{\theta_1}(\cdot|s_t)||\pi_{\theta_0}(\cdot|s_t)\right)\le \epsilon
+\text{KL}\left(\pi_{\theta_1}(\cdot|s)||\pi_{\theta_0}(\cdot|s)\right)\le \epsilon
 $$
 
-的情况下进行优化。接下来，有两种可能的思路。通过第二种思路，我们可以最终建立起通往policy gradient的桥梁。
+的情况下进行优化。注意到这里有个问题：因为上式要对任何 $s$ 都成立，而这样的话约束个数就等于 state space 的大小！为了将其变为一个约束，我们可以将其放松到如下条件
+$$
+\mathbb{E}_{s\sim q}[\text{KL}\left(\pi_{\theta_1}(\cdot|s)||\pi_{\theta_0}(\cdot|s)\right) ]\le \epsilon,
+$$
+
+其中 $q$ 是任意的一个 distribution。
+
+为了满足这个约束，有两种可能的思路。
 
 ### Method 1: Add to loss
 
@@ -139,7 +146,17 @@ $$
 \beta\leftarrow \beta+\alpha(\text{KL}-\epsilon)
 $$
 
-决定。一个基于这样的思路的著名算法是**PPO（Proximal Policy Optimization）**。
+决定。算法的流程如下：
+
+> Repeat until satisfied:
+    > 1. $\theta_1\leftarrow \arg\min \tilde J(\theta_1,\beta)$ (实践上，对 $\theta_1$ 作若干步 Gradient step);
+    > 2. $\beta\leftarrow \beta+\alpha\cdot (\text{KL}\left(\pi_{\theta_1}(\cdot|s_t)||\pi_{\theta_0}(\cdot|s_t)\right)-\epsilon)$, $s_t$ 通过若干 trajectory 取样。
+
+事实上，这是一种随机化的 **Dual Gradient Descent**: 只要我们想要解决如下优化问题
+$$\min_\mathbf{x} f(\mathbf{x}),\quad \text{s.t. }C(\mathbf{x})=0,$$
+其中 $f,C$ 关于 $\mathbf{x}$ 可微，就可定义 $L=f+\lambda C$, 每轮先 fix $\lambda$ 对 $L(\mathbf{x})$ 作若干步 GD, 再 fix $\mathbf{x}$ 更新 $\lambda\leftarrow \lambda +\alpha \frac{\partial L}{\partial \lambda}$.
+
+一个基于这样的思路的著名算法是**PPO（Proximal Policy Optimization）**。
 
 ### Method 2: Natural Gradient
 
@@ -157,28 +174,32 @@ $$
 
 我们惊奇地发现，这个表达式**就是**之前policy gradient中[First Order Approximation](./5-policy_grad.md#with-first-order-approximation)的表达式！换句话说，**原先的Policy Gradient的First-order-approximation在一定条件下是合理的；它有效的条件是KL divergence不能太大。**
 
-接下来，让我们来严格地对待这个优化问题。首先，作小量近似，可以给出约束的形式
+事实上，我们可以通过一些近似，省略掉 Dual GD 的步骤。首先，对 KL divergence 进行二阶估计：
 
 $$
-\text{KL}(\pi_{\theta_1}(\cdot|s_t)||\pi_{\theta_0}(\cdot|s_t))\approx \frac{1}{2}(\theta_1-\theta_0)^T \mathbf{F} (\theta_1-\theta_0) \le \epsilon
+\mathbb{E}_{s_t\sim \pi_{\theta_0}}\text{KL}(\pi_{\theta_1}(\cdot|s_t)||\pi_{\theta_0}(\cdot|s_t))\approx \frac{1}{2}(\theta_1-\theta_0)^T \mathbf{F} (\theta_1-\theta_0).
 $$
 
 这里 $\mathbf{F}$ 是Fisher information matrix：
 
 $$
-\mathbf{F}=\mathbb{E}_{a\sim \pi_\theta(a|s)}\left[\nabla_\theta \log \pi_\theta(a|s)\nabla_\theta \log \pi_\theta(a|s)^T\right]
+\mathbf{F}=\mathbb{E}_{s,a\sim \pi_\theta}\left[\nabla_\theta \log \pi_\theta(a|s)\nabla_\theta \log \pi_\theta(a|s)^T\right].
 $$
 
-而优化的目标在首阶近似下可以写为
+再对优化目标 $J(\theta_1)$ 作一阶近似，得到
 
 $$
-J(\theta_1)\approx J(\theta_0)+(\theta_1-\theta_0)\nabla_{\theta_0}J(\theta_0)
+J(\theta_1)\approx J(\theta_0)+(\theta_1-\theta_0)\nabla_{\theta_0}J(\theta_0).
 $$
 
-这时，因为有一个同阶的约束，我们就**不一定沿着梯度的方向**前进（因为沿着梯度虽然目标函数下降很快，但可能沿着这个方向被约束的比较严重，可能不能走很远）。因此，需要使用拉格朗日乘数法：
+我们现在考虑对 $J-\alpha\cdot \text{KL}$ 作 dual GD。然而，因为我们对 objective 作了近似，我们可以直接求出最后的收敛点：$\theta_1,\alpha$ 需要满足 
 
 $$
-0=\nabla_{\theta_1}\left[(\theta_1-\theta_0)\nabla_{\theta_0}J(\theta_0)-\frac{1}{2\alpha}(\theta_1-\theta_0)^T \mathbf{F} (\theta_1-\theta_0)\right]
+0=\nabla_{\theta_1}\left[(\theta_1-\theta_0)\nabla_{\theta_0}J(\theta_0)-\frac{\alpha}{2}(\theta_1-\theta_0)^T \mathbf{F} (\theta_1-\theta_0)\right],
+$$
+
+$$
+\frac{\alpha}{2}(\theta_1-\theta_0)^T \mathbf{F} (\theta_1-\theta_0)=\epsilon.
 $$
 
 计算可以得到
@@ -187,7 +208,19 @@ $$
 \theta_1\leftarrow \theta_0 + \sqrt{2\epsilon} \frac{F^{-1}g}{\sqrt{g^TF^{-1}g}}
 $$
 
-其中 $g=\nabla_{\theta_0} J(\theta_0)$ 是原来的梯度。这个算法就被称为**Natural Gradient**。还有一个更著名的、基于这一方法的算法，称为**TRPO（Trust Region Policy Optimization）**。
+其中 $g=\nabla_{\theta_0} J(\theta_0)$ 是原来的梯度。这个算法就被称为**Natural Gradient**。还有一个更著名的、基于这一方法的算法，称为**TRPO (Trust Region Policy Optimization)**。
+
+### TRPO (Brief)
+
+TRPO 在这个方法的基础上，最后增加了一个 **line search**: 因为我们对 KL divergence 和 loss 做了二阶和一阶近似，之前的约束条件不一定被满足。事实上，论文中指出，有时候这种估计会让 policy 走一大步，从而显著降低 performance。
+
+假设模型做了更新 $\theta_1\leftarrow \theta_0+\alpha\cdot \mathbf{v}$, $\mathbf{v}$ 是单位向量。每次我们将 $\alpha$ 指数缩减，并再次检查是否满足约束。
+
+除此之外，论文也给出了一个理论分析。假设 $\max_{s,a} |A_\pi(s,a)|$ 有界 $\epsilon>0$, 则存在常数 $C(\epsilon)$, 满足对任意两个 policy $\pi,\pi'$, 都有
+$$\eta(\pi')\ge \eta(\pi)+J_{\pi}(\pi')-C\cdot \text{KL}^{\max}(\pi||\pi'),$$
+其中
+$$\text{KL}^{\max}(\pi||\pi')=\max\limits_{s} \text{KL}(\pi(\cdot|s)||\pi'(\cdot|s)).$$
+于是，我们只需要最优化 $J_{\pi}(\pi')-C\cdot \text{KL}^{\max}(\pi||\pi')$，就能保证 policy 的期望收益 $\eta(\pi')\ge \eta(\pi)$. 也就是说，如果我们限制 $\text{KL}^{\max}$ 在很小的范围内，$\eta$ 至少不会显著下降。
 
 > Q: 直观地说，Natural Gradient在做什么？
 >

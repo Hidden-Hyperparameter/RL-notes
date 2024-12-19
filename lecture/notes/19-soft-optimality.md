@@ -27,13 +27,17 @@
 
 我们建立这样一个graphical model。所谓graphical model，就是指每一条线代表一个依赖关系。比如， $s_2$ 依赖于 $s_1,a_1$ ，且依赖关系就是 $s_2\sim p(s_{2}|s_1,a_1)$ 这一转移概率。
 
-需要注意，图中的 $O$ 并不是observation，而是我们引入的重要变量——**Optimalty**。它是一个布尔变量，**大致**代表这一步是不是作出“优的”决策（这一概念比较玄乎，需要慢慢体会）。 $p(O_t|s_t,a_t)$ 是一个未知的概率分布，但是我们假设它对于不同的 $t$ 是同一个函数形式。我们据此**重定义 reward**：
+需要注意，图中的 $O$ 并不是observation，而是我们引入的重要变量——**Optimalty**。它是一个布尔**随机**变量，代表这一步是不是作出“优的”决策（$1$ 表示优，$0$ 表示不优）。 $p(O_t|s_t,a_t)$ 是一个未知的概率分布，但是我们假设它对于不同的 $t$ 是同一个函数形式。
+
+为什么要引入 $O$？重点是要体现之前提到的**决策随机性**：即使一个 trajectory 的 reward 不是最优的，我们也希望给它一些 $p(O=1)$ 的概率。可以想象这个概率随着 reward 的增大而增大。在课上，我们对 $p$ 的建模是
 
 $$
-r(s_t,a_t)=\log p(O_t=1|s_t,a_t)
+p(O_t=1|s_t,a_t) = \exp\{r(s_t,a_t)\}.
 $$
 
-最后，我们需要建模的对象是 $p(\tau|O_{1,...,T}=\text{True})$ 。这里注意，我们设置 $O_{1,...,T}=\text{True}$ ，是因为我们模拟的基本原则还是尽可能作出“优的”决策。
+注意这里必须要 $r(s_t,a_t)\le 0$。这并不改变一般性，因为可以把 $r$ 同时减少一个常数。
+
+那么如何定义最优决策呢？答案是 $p(\tau|O_{1,...,T}=1)$。我们 condition on $O_{1,...,T}=1$，是因为我们的基本原则还是尽可能作出“优的”决策。可以想象，因为所有路径都有一定概率使得 $O_{1:T}=1$，所以都会有概率被遍历到；另一方面，真正最优的路径因为使得 $O_{1:T}=1$ 概率更高，所以被遍历的概率也更高。
 
 > Q: 等等，什么玩意，如果让 $O_{1,...,T}=\text{True}$ ，不就是一直做最优的决策，那策略不就确定了吗？
 >
@@ -134,10 +138,10 @@ $$
 \log p(O_t|s_t,a_t)=:r(s_t,a_t)\propto r_c(s_t,a_t)
 $$
 
-并且 $r(s_t,a_t)\to \infty$ 的时候，我们这一graphical model给出的 $\beta_t$ 具有一种“Q function”和“V function”的意思。当然，backup方程中并不是直接取最大值，而是取了一个`logsumexp`，这可以视作一种“软的”最大值，但softmax这一名词已经用过了，我们不妨管这一操作叫做 **“birdmax”**（注意，这个名词是我自己造的，不要用）。
+并且 $r(s_t,a_t)\to \infty$ 的时候，我们这一graphical model给出的 $\beta_t$ 具有一种“Q function”和“V function”的意思。当然，backup方程中并不是直接取最大值，而是取了一个`logsumexp`，这可以视作一种“软的”最大值。我们不妨管这一操作叫做 **“birdmax”**（注意，这个名词是我自己造的，不要用）。
 
 $$
-\text{BirdMax}(x)=\log \mathbb{E}_{x\sim p(x)}[e^x]
+\text{BirdMax}(x):=\log \mathbb{E}_{x\sim p(x)}[e^x]
 $$
 
 这样，我们就有
@@ -232,7 +236,7 @@ $$
 Q_t(s_t,a_t)=r(s_t,a_t)+\text{BirdMax}_{s_{t+1}}[V_{t+1}(s_{t+1})]
 $$
 
-注意birdmax的计算方式是logsumexp，这很容易造成过度的自信。
+注意birdmax的计算方式是logsumexp，这很容易造成过度的自信：birdmax 会更加注意到 $V$ 更大的 state，所以相比期望 value 来说会产生极大的 optimism。
 
 > 我们考虑如下的例子。
 
@@ -264,9 +268,9 @@ $$
 \pi_t(a_t|s_t)=p(a_t|s_t,O_{1..T}=1)
 $$
 
-这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，转移概率不是 $p(s_{t+1}|s_t,a_t,O_{1..T}=1)$ ，而是 $p(s_{t+1}|s_t,a_t)$ 。
+这一点并不合适。因为这相当于告诉了流浪汉：“你放心买彩票吧，我有后门，包准赢！”。但事实是残酷的，**转移概率不是 $p(s_{t+1}|s_t,a_t,O_{1..T}=1)$ ，而是 $p(s_{t+1}|s_t,a_t)$**。
 
-因此，我们的policy应该重新被选取。很自然地，我们选取它为残酷的事实下的最近似分布：
+因此，我们的policy应该重新被选取——我们不再假设转移概率也 condition on $O$。很自然地，我们选取它为残酷事实下的最近似分布：
 
 $$
 \pi = \arg\min_{\pi}\text{KL}\left(p_{\pi}(s_{1..T},a_{1..T})||p(s_{1..T},a_{1..T}|O_{1..T}=1)\right)
@@ -278,13 +282,13 @@ $$
 p(s_{1..T},a_{1..T}|O_{1..T}=1)=p(s_1|O)p(a_1|s_1,O)p(s_2|s_1,a_1,O)p(a_2|s_2,O)\cdots
 $$
 
-为理想的分布；而
+为理想转移 $p(s_{t+1}|s_t,a_t,O=1)$ 的分布；而
 
 $$
 p_{\pi}(s_{1..T},a_{1..T})=p(s_1)\pi(a_1|s_1)p(s_2|s_1,a_1)\pi_2(a_2|s_2)p(s_3|s_2,a_2)\cdots
 $$
 
-为我们约束下的分布。
+为残酷现实的转移 $p(s_{t+1}|s_t,a_t)$ 下的分布。
 
 ### Variational Inference
 
@@ -410,7 +414,7 @@ $$
 
 （这里出于和之前说的一样的理由，一个temperature参数 $\alpha$ 作为hyperparameter需要被引入。）
 
-可以看到，这一迭代方式比较奇特——在Q算V的时候，我们用的是比较“软”的birdmax；而在V算Q的时候，我们直接使用期望值。这有点像是之前第一个版本的graphical model inference方法和普通的Q-V iteration方法的结合。普通的Q-V iteration不允许sub-optimal behavior的出现；graphical model inference方法出现严重的optimism问题；而这一方法结合了两者的优点，并且建立在坚实的理论依据上，给出了一个很好的解决方案。
+可以看到，这一迭代方式比较奇特——在用 $Q$ 算 $V$ 的时候，我们用的是比较“软”的 birdmax；而在用 $V$ 算 $Q$ 的时候，我们直接使用期望值。这有点像是之前第一个版本的graphical model inference方法和普通的Q-V iteration方法的结合。普通的Q-V iteration不允许sub-optimal behavior的出现；graphical model inference方法出现严重的optimism问题；而这一方法结合了两者的优点，并且建立在坚实的理论依据上，给出了一个很好的解决方案。
 
 如果你感兴趣，也可以把这个新的迭代公式代入我们之前买彩票的例子。你会发现，流浪汉不会再作出那荒谬的决定了。
 
@@ -430,7 +434,7 @@ soft optimality就是这些东西的杂交产物，在一个specific的，目标
 
 ## Soft Actor-Critic
 
-SAC算法可以说是Q learning方法中最大名鼎鼎的一种（虽然我们之前的18讲中都没怎么提到它！）。它就是基于前面的soft optimality的理论。
+SAC算法可以说是Q learning方法中最大名鼎鼎的一种（我们在第八讲 Q-learning 的时候简单介绍过）。事实上，它就是基于前面的soft optimality的理论。
 
 > **SAC algorithm**
 

@@ -148,7 +148,16 @@ $$
 2. 用上面的公式计算梯度，其中 $\pi^\star$ 的期望就是数据集的平均；
 3. 用梯度更新 $\psi$ 。
 
-当然，这个求和的工作量巨大，是 $|S|\times|A|\times T$ 。而且，每一个gradient step，都要重新算一次！如果没钱买不起A100，还有救吗？别急——还记得，刚才我们还给出了一个基于采样和contrastive learning的方法。我们来看一看，这一方法能否减少计算量。
+既然是 enumerate version，这个方法的缺陷很明显：第二步的求和的工作量巨大，是 $|S|\times|A|\times T$；而且，每做一次 gradient step，就要重新算一次梯度，并且还要求解 $\alpha(s_t)$ 和 $\beta(s_t,a_t)$，也就是要重新算一遍 reward 对应的 optimal policy。
+
+在实际应用中，我们可能会面对以下的情形：
+
+- 巨大或连续的 state / action space；
+- 不能枚举 state，它只能通过做 action 观测得到；
+- 转移概率未知；
+- ...
+
+接下来我们将介绍如何拓展这个方法，使其能够处理这些情形。
 
 ### Using policy to reduce computation
 

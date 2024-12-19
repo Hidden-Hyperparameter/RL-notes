@@ -38,6 +38,11 @@ $$
 
 *Comments.* 直观上看，对于使得reward $\sum r(s_t,a_t)$ 很大的 $a_t$ ，梯度 $\nabla \log \pi_\theta(a_t|s_t)$ 的"learning rate"更大，所以模型会倾向于把更大的概率给这个action。
 
+当只有 partial observability 时，也可以直接修改 $J(\theta)$ 的梯度为
+$$
+\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \left(\sum_t \nabla_\theta\log \pi_\theta(a_t|o_t)\right)\left(\sum_t r(s_t,a_t)\right).
+$$
+
 ## Issues with the vanilla Policy Gradient
 
 这个算法听起来很直观并且很好实现，但是实际上会发现有一定的问题：**reward出现的方式不对**。
@@ -61,11 +66,14 @@ $$
 
 这里的 $b$ （称为**baseline**）应该是任意的，因为
 $$
-\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\nabla_\theta\log p_{\pi_\theta}(\tau)\right]=0
+\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\nabla_\theta\log p_{\pi_\theta}(\tau)\right]=0.
 $$
-
-但是另一方面，就像我们前面提到的那样，样本有限的时候可不能乱搞——我们必须选取 $b$ 使得variance最小。但这个计算复杂度太高了，实际上一般不会使用。
-
+注意到这里的 $b$ 可以任意选取，所以我们可以选取使得方差变小的 $b$，比如
+$$b=\dfrac{1}{N}\sum\limits_{i=1}^N r(\tau_n).$$
+如果直接令 $\nabla_\theta J(\theta)$ 的方差最小化，可以解得
+$$
+b=\dfrac{\mathbb{E}[(\nabla_\theta \log p_{\pi_\theta}(\tau))^2r(\tau)]}{\mathbb{E}[(\nabla_\theta \log p_{\pi_\theta}(\tau))^2]}.
+$$
 ### Causality
 
 Causality关注到了一个不易察觉的问题：我们原来的表达式其含义是， $\pi_\theta(a_t|s_t)$ 的梯度依赖于整个过程的reward大小 $\sum_{t}r(s_t,a_t)$ ；但实际上这并不合理——根据因果性， $t$ 时刻的决策不会影响 $t'<t$ 时刻的reward。因此，即使前面几步走的比较差，你不能让后面走的很好的步骤也蒙受这个惩罚。
@@ -73,7 +81,10 @@ Causality关注到了一个不易察觉的问题：我们原来的表达式其�
 按照这个思路，我们直接改写
 
 $$
-\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)=\frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
+\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\left(\sum_{t'=t}^T r(s_{t'},a_{t'})\right)
+$$
+$$
+=\frac{1}{N}\sum_{n=1}^N \sum_{t=1}^T \nabla_\theta\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
 $$
 
 其中的 $\hat{Q}^{\pi_\theta}_{n,t}$ 有点类似于Q-function但并不是——它是依赖于路径的，“未来所有reward之和”。
@@ -84,13 +95,15 @@ $$
 \mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\nabla \log \pi_\theta(a_t|s_t)\left(\sum_{t'<t}r(s_{t'},a_{t'})\right)\right]=0
 $$ 
 
-只不过，就如我们之前说的那样，通过减小不应该出现的项进行约化，这个利用了causality的表达式会减小variance。
+只不过，我们用取样 $N$ 次来估计期望，所以这些看似是 $0$ 的项变成非 $0$ 的了，会贡献一部分方差。将这些部分去掉就能显著减少训练方差，稳定训练。
 
 # Off-Policy Policy Gradients
 
-除了巨大的variance之外，policy gradient的on-policy特性（见第4讲）也造成了sample efficiency的问题。当然，一般policy gradient都是用在sample efficiency不需要特别考虑的地方，但是我们还是讨论一类特别的方式，把off-policy的思想引入policy gradient。
+为了计算 $J$ 的梯度，我们需要取样 $\tau\sim p_{\pi_\theta}(\tau)$，所以 policy gradient 是 on-policy 的，造成**采样效率**的问题。
 
-关键在于采用**Importance Sampling**。假设现在我们有 $p_{\pi_{\bar{\theta}}}$ 这个分布中取样的若干样本，那么我们就可以用importance sampling利用这些样本来估计 $p_{\pi_\theta}$ 分布中某些东西的期望。具体地，我们写出
+当然，一般policy gradient都是用在sample efficiency不需要特别考虑的地方，但是我们还是讨论一类特别的方式，把off-policy的思想引入policy gradient。
+
+关键在于采用 **Importance Sampling**。假设现在我们有 $p_{\pi_{\bar{\theta}}}$ 这个分布中取样的若干样本，那么我们就可以用importance sampling利用这些样本来估计 $p_{\pi_\theta}$ 分布中某些东西的期望。具体地，我们写出
 
 $$
 \nabla_{\theta}J(\theta)=\mathbb{E}_{\tau\sim p_{\pi_\theta}(\tau)}\left[\nabla_{\theta}\log p_{\pi_\theta}(\tau)\sum_t r(s_t,a_t)\right]

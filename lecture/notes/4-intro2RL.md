@@ -138,6 +138,12 @@ $$
 - **sample efficiency**: 
     - 这也被称为是否 "off-policy" ？"off-policy" 指的是，就算policy改变了，我们也可以利用之前的数据。这样的算法更加sample efficient。
     - 我们什么时候要care sample efficiency呢？可以发现，如果我们的环境是一个真实的物理环境，那么sample efficiency就很重要了。但如果我们的环境是一个模拟环境，我们就不用管这个。
-    - 可以发现，最需要sample的当然是policy gradient；而model-based 和 value-based 需要的sample数是最少的。
+    - 可以发现，Policy Gradient 方法是 on-policy 的：当 policy 改变的时候，我们需要重新获取若干 sample 才能正确获取 reward 的梯度。反之，Value-based 和 Model-based 方法则是 off-policy 的，因为可以利用之前的训练数据，故有更高的 sample efficiency。
 - **wall clock time**:这是计算复杂度的一个简称。如果我们的模型要高频地与环境交互，那么计算复杂度就很重要了。
-- **stability**:这是指算法的稳定性。policy gradient作为一个梯度下降算法，总是可以保证convergence；但其他大部分的RL算法的convergence还是open question。
+- **stability**:这是指算法的稳定性。policy gradient作为一个梯度下降算法，总是可以保证convergence；但其余不采用 GD 的 RL 方法，比如 Value function fitting，在最坏情况下没有任何的理论收敛保证。
+
+## Common Assumptions
+
+- **Full Observability**. 经常出现在 value function fitting 方法中。假设模型能够看到环境中的一切信息，i.e. $s_t=o_t$. 可以用循环模型架构缓解 partial observation。
+- **Episodic Learning**. 经常出现在纯粹的 policy gradient，以及一些 model-based 方法中。这意味着 agent 与环境的交互由一个个 episode 组成，每个 episode 有始有终，并有明确的目标。
+- **Continuity or Smoothness**. 在 model-based 方法中经常出现。

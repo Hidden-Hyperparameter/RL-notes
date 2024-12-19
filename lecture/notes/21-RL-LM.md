@@ -22,25 +22,27 @@ POMDP可能比较奇怪。首先，可能有一些奇怪的action出现，其“
 
 ### Method 1: Treating POMDP as MDP
 
-接下来，我们来研究如何解决POMDP的问题。一个很自然的想法就是，我们在之前的方法里面，直接把所有state替换为observation。这样行不行呢？这就取决于，原来的方法是否依赖于state的Markov property。接下来，我们分别来讨论。
+接下来，我们来研究如何解决POMDP的问题。一个很自然的想法就是，我们在之前的方法里面，直接把所有state替换为observation。这样行不行呢？这就取决于原来的方法是否依赖于 state 的 Markov property ($s_t$ 只和 $s_{t-1}$ 和 $a_t$ 有关，但在 observation 的情况下并非如此)。
 
-需要注意，这样给出的policy只能是memoryless的，因为原来的policy只依赖于当前的 $s_t$ 。
+需要注意，这样给出的policy只能是 memoryless 的，因为原来的policy只依赖于当前的 $s_t$。
 
 #### Policy Gradients
 
 替换后的第一种形式是
 
 $$
-\nabla_\theta J(\theta) = \mathbb{E}_{\tau\sim \pi_\theta}\left[\log \pi_\theta(a_t|o_t)\hat{A}(o_t,a_t)\right]
+\nabla_\theta J(\theta) = \mathbb{E}_{\tau\sim \pi_\theta}\left[\sum_t\nabla_\theta \log \pi_\theta(a_t|o_t)\hat{A}(o_t,a_t)\right],\quad (1)
 $$
 
 其中
 
 $$
-\hat{A}(o_t,a_t)=\sum_{t'=t}^T \gamma^{t'-t}r(o_{t'},a_{t'}) - b(o_t)
+\hat{A}(o_t,a_t)=\sum_{t'=t}^T \gamma^{t'-t}r(o_{t'},a_{t'}) - b(o_t).
 $$
 
-是advantage；这里 $b(o_t)$ 是baseline。这一形式的推导是否依赖于Markov property呢？答案是**不依赖**，具体可以回顾很久之前的[推导过程](./5-policy_grad.md)。
+是advantage；这里 $b(o_t)$ 是baseline。这一形式的推导是否依赖于Markov property呢？答案是**不依赖**。回顾 Policy Gradient 的推导过程，假设 $a_t$ 只依赖于 $o_t$，但是 $o_t$ 可能依赖 $o_{1:t-1}$，我们仍然可以写
+$$\nabla_\theta J(\theta)=\mathbb{E}_{\tau\sim \pi_{\theta}}\left[\left(\sum_t \nabla_\theta \log \pi_\theta(a_t|o_t)\right)\left(\sum_t \gamma^t r(o_t,a_t)\right)\right].$$
+仔细观察可以发现：我们仍然可以假设当 $t_1>t_2$ 时， $\nabla_\theta \log \pi_\theta(a_{t_1}|o_{t_1})\cdot r(o_{t_2},a_{t_2})$ 项的贡献是 $0$（对 $a_{t_2+1:T}$ 积分）。所以 $(1)$ 式仍然成立。
 
 但是如果再进一步到actor-critic algorithm，就不行了：一个actor-critic的尝试是把advantage改为模型的近似：
 
@@ -58,22 +60,23 @@ $$
 
 model-based method行不行？直观上，肯定不行，因为model学习的是 $p(o_{t+1}|o_t,a_t)$ ，对于 $o_{t+1}$ 而言只有 $o_t,a_t$ 是不够的。这里，也可以举出一些例子，但为了简单起见，这里不再详细讨论。
 
+接下来介绍的两种方法，State space Models & Recurrent Models，都没有忽略 $o_t$ 的历史依赖性，因此实践上更加有效。
+
 ### Method 2: State space Models
 
-接下来介绍的Method 2和Method 3都不属于memoryless的方法，因此通常效果比memoryless的方法更好。state space model是指，我们学习一个类似VAE的model：latent variable $z$ 是state；而“图片”是observation $x$ 。在decode的时候， $x_t$ 只依赖于 $z_t$ ；而在encode的时候， $z_t$ 依赖于 $x_1,\cdots,x_t$ （当然，你可以设计糟糕透顶的observation使得 $x$ 不包含任何信息，因此无法通过 $x_1,\cdots,x_t$ 得到state $z_t$ ，但我们暂时不考虑这类情况）。这样，我们就可以用VAE的方法来学习这个model：
+虽然 observations 并不满足 Markov property，我们能不能学习一个 hidden state $z$，使其满足 Markov property 呢？假如我们真的学到了这样的 $z$，那么 POMDP 就和普通的 MDP 没有任何区别了！
 
+具体来说，我们学习一个 **autoencoder**：latent variable $z$ 是 state；而 input $x$ 是 observation。在 decode 的时候，我们希望 $x_t$ 可以通过 $z_t$ 还原出来，所以我们写
 $$
-p_\theta(x|z)=\prod_t p_\theta(x_t|z_t)
+p_\theta(x|z)=\prod_t p_\theta(x_t|z_t);
 $$
-
+而在 encode 的时候，$z_t$ 依赖于 $x_1,\cdots,x_t$，也即
 $$
-q_\phi(z|x)=\prod_t q_\phi(z_t|x_{1:t})
+q_\phi(z|x)=\prod_t q_\phi(z_t|x_{1:t}).
 $$
-
-但和普通VAE不同的是，hidden state $z$ 并非均匀高斯，而是需要一个新的dynamic model来学习：
-
+我们希望 $z$ 的转移满足 Markov property，也即
 $$
-p(z)=p(z_1)\prod_t p_\psi(z_{t+1}|z_t,a_t)
+p(z)=p(z_1)\prod_t p_\psi(z_{t+1}|z_t,a_t).
 $$
 
 我们依然可以使用ELBO作为目标来训练。回顾一下，它写为：
@@ -82,13 +85,11 @@ $$
 \text{ELBO}= \mathbb{E}_{z\sim q_{\phi}(z|x)}\left[\log p_{\theta}(x|z)\right]-\text{KL}(q_{\phi}(z|x)||p(z))
 $$
 
-注意到给定了 $x$ 之后， $z$ 的分布是独立的高斯乘积，因此很容易`rsample`；唯一的问题是， $p(z)$ 不是高斯分布，因此第二项KL divergence不容易立刻看出来。一个方法可能是，我们直接把 $p(z)$ 中不同的部分脱离开：
+注意到给定了 $x$ 之后， $z$ 的分布是独立的高斯乘积，因此很容易`rsample`；唯一的问题是 $p(z)$ 不是高斯分布，所以我们不能像 vanilla VAE 那样写出显式表达。我们有
 
 $$
-\text{KL}(q_{\phi}(z|x)||p(z))\approx \sum_t \text{KL}(q_{\phi}(z_t|x_{1:t})||p(z_t|z_{t-1},a_{t-1}))
+\text{KL}(q_{\phi}(z|x)||p(z))=\mathbb{E}_{z\sim q_\phi(z|x)}\sum_t \text{KL}(q_{\phi}(z_t|x_{1:t})||p(z_t|z_{t-1},a_{t-1})).
 $$
-
-虽然这并不严格相等，因为 $p(z_t|z_{t-1},a_{t-1})$ 也依赖于 $z_{t-1}$ ，但是考虑到 $a_{t-1}$ 也是随机采样得到的，这个分工是合理的。
 
 假设训练完成之后具有很小的Loss，那么我们就可以用 $z_t$ 当作state做之后的任务。这样，我们就可以用普通的RL方法来解决POMDP问题了。
 
@@ -102,9 +103,11 @@ $$
 s_t:= (o_1,\cdots,o_t)
 $$
 
-这一方法也因此称为**history states**。我们可以发现，虽然这个state不一定具有原始state那样多的信息，但它始终是markov的；并且我们可以假设，对于合理的 $o_t$ 选择，它提供了我们能获得的最多的信息。
+这一方法也因此称为**history states**。
 
-这样，自然我们的Q网络就需要处理sequence的输入，因此我们需要采用sequence modeling。这就是language models在RL中的一处重要用途。
+> Random Thought: 如果假设使用 history states 的话，一切都是 markov model——因为这是我们能获得的最多的信息！
+
+这样，自然我们的Q网络就需要处理sequence的输入，因此我们需要采用sequence modeling。这就是 seq2seq model 在 RL 中的一处重要用途。
 
 当然，有一个比较好的计算技巧：在sample trajectory的时候，我们采集到一系列的 $o_1,\cdots,o_t$ ；每一次获得observation之后，我们都要用Q网络给出一个action。这就可能导致如果每一次都重新跑一遍模型，工作量会比较大（是 $t^2$ 量级）。但一个很好的方法是，对于RNN-based的模型，我们可以存下hidden state，这样的话输入一个新的 $o_t$ ，只需要进行一次计算即可。在实现的时候，我们可以把RNN hidden state存入replay buffer。对于transformer，需要采取别的优化方式。
 
@@ -178,7 +181,9 @@ $$
 p_\theta(a_2\succ a_1)=\sigma\left(\beta\cdot\left(-\log \frac{\pi_\theta(a_1|s)}{\pi_0(a_1|s)} + \log \frac{\pi_\theta(a_2|s)}{\pi_0(a_2|s)}\right)\right)
 $$
 
-是model误判 $a_2$ 比 $a_1$ 好的概率。这很直观——我们总是让model尽量放大 $a_1$ 的概率，减少 $a_2$ 的概率；但我们让它最关注犯错的地方，而做对的地方可以少训练一些。你也许会回忆起，你的高中（或者初中）老师也这样让你练习错题。你现在就会发现，他/她做的一切都是有深意的！
+是model误判 $a_2$ 比 $a_1$ 好的概率。这很直观——我们总是让model尽量放大 $a_1$ 的概率，减少 $a_2$ 的概率；但我们让它最关注犯错的地方，而做对的地方可以少训练一些。
+
+> 你也许会回忆起，你的高中（或者初中）老师也这样让你练习错题。你现在就会发现，他/她做的一切都是有深意的！
 
 ## Multi-step Language Models
 

@@ -43,7 +43,7 @@ $$
 $$
 其中， $\pi^\star$ 是专家的策略。需要注意，这里完全没有RL的知识，只是普通的DL问题。这也有时候被叫做behavior cloning。
 
-模型的实现可以是DL中的很多类型的网络。比如说CNN,VAE,甚至diffusion models。更进一步，有些研究考虑专家的Non-Markov性质，因此使用RNN来建模。当然，很多经验证明有“历史”的模型不一定比“无历史”的模型好。
+模型的实现可以是任何网络, 比如 CNN, ViT。更进一步，有些研究考虑专家的Non-Markov性质，因此使用 RNN 来建模。
 
 
 # Behavior Cloning Analysis
@@ -52,13 +52,17 @@ $$
 
 比如说，一个模型在“走钢丝”，它每一步有98%的概率走在正确的道路上。这样的模型如果从我们训练数据的角度来看，已经是一个很不错的DL模型了。但是假设模型决策100步，那么只有13%左右的概率它依然保持在专家的道路上！
 
+不同于传统的 supervised learning, 因为每一步的状态是根据之前的 action 决定的, 所以并不满足数据的 i.i.d. assumption。所以, 在模型偏离训练数据的时候，我们并不能保证模型能做出正确的选择。
+
+但在某些场景下，Behavior Cloning 确实能 work：假如能通过训练数据学习到真正的 pattern。
+
 下面给出了一些数学上的分析。它们的主要目的都是为了bound住behavior cloing的模型和专家之间的差距。
 
 ## Notations
 - $a=\pi^{\star}(s)$ : the expert policy gives $a$ when the state is $s$
 - $\pi_\theta$ : the policy we are trying to learn
 - $p_{\pi_\theta}(s_t)$ : the probability of being at state $s_t$ at time $t$ if we follow $\pi_\theta$ . 
-    - **重要提示**: $p_{\pi_\theta}(s_t)$ 的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$ 的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。 的确——you are on the road :)
+    - **重要提示**: $p_{\pi_\theta}(s_t)$ 的这个 $p_{\pi_\theta}$ 分布和 $p_{\pi_\theta}(s_{t+1})$ 的这个 $p_{\pi_\theta}$ 分布可不是一个分布！一个是在 $t$ 时的分布，一个是在 $t+1$ 时的分布。
 - Use $|p_1-p_2|$ to denote the total variance distance between $p_1$ and $p_2$ : $|p_1-p_2|=\sum_{x}|p_1(x)-p_2(x)|$
 
 ## Distribution Distance
@@ -73,7 +77,7 @@ $$
 $$
 
 
-**Proof**. **归纳**在这类问题是很常见的方法。我们试着把 $t+1$ 时刻和 $t$ 时刻的表达式联系起来：
+**Proof**. 对 $t$ 归纳。
 
 $$
 \left|p_{\pi_\theta}(s_{t+1})-p_{\pi^\star}(s_{t+1})\right|=\left|\sum_{s_t,a_t}p(s_{t+1}|s_t,a_t)\pi_\theta(a_t|s_t)p_{\pi_\theta}(s_t)-\sum_{s_t}p(s_{t+1}|s_t,\pi^\star(s_t))p_{\pi^\star}(s_t)\right|.
@@ -115,7 +119,7 @@ $$
 S=\sum_{t\le T} E_{s_t\sim p_{\pi_\theta}}[c_t(s_t,a_t)]=\mathcal{O}(\epsilon T^2).
 $$
 
-（直观上说，这是指我们的模型**失败的步数**是 $\mathcal{O}(T^2)$ 的。虽然这只是一个上界，但 intuitively 它应该是比较准确的。）
+直观理解证明：如果模型错了一次，那么若要估计“错误步数”的上界，我们就必须假设从此往后模型的所有预测都是错误的。而通过上面的不等式，在第 $t$ 步的概率分布偏差不超过 $2\epsilon t$, 所以这一步对 $S$ 的贡献也不超过 $2\epsilon t$.
 
 **Proof**. 
 
@@ -135,13 +139,15 @@ $$
 
 # Make Bahavior Cloning Work
 
-介绍几个常见的方法，解决bahavior cloning的这个问题。
+介绍几个常见的方法, 解决bahavior cloning的这个问题。
 
 ## Adding Mistakes
  
 假设我们的模型学会改正自己的错误（比如，在走钢丝的时候，身体向左倾倒的时刻，我们的模型能够自动调整身体向右倾倒）。这样的话，成功的概率会大很多。
 
 一个典型的实验是，我们做一个驾驶的模型，然后做三个摄像头：一个正常的摄像头，一个向左偏移的摄像头，一个向右偏移的摄像头。在训练的时候，左边摄像头的图片被标记为“右转”，右边摄像头的图片被标记为“左转”。这样的话，我们的模型就能够学会自动调整。
+
+> 所以我们在训练数据中刻意**加入错误并最终改正**，能够训练模型纠正误差的能力。同时可以像上一个驾驶的例子一样，做 **Data Augmentation**。
 
 ## Multi-task Learning
 
@@ -160,6 +166,8 @@ $$
 $$
 
 也就是说，我们模型知道了对于每一个 **目标 $s_T$** 应该每一步怎样走。这样的操作也叫做 Goal-conditioned behavior cloning。
+
+论文 [Learning to Reach Goals via Iterated Supervised Learning](https://arxiv.org/abs/1912.06088) 指出，Goal-conditioned data 可以通过如下方式获得：根据当前的策略 $\pi$, 随机指定目标 $g$, 并根据 $\pi(a|s,g)$ 生成一条 trajectory。如果这条路径到达了另一个目标 $g'$, 就将这条路径重新标注为**目标为 $g'$ 的路径**加入数据中。
 
 ## DAgger
 
@@ -182,3 +190,5 @@ $$
 # Reference Papers
 
 1. [A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning](https://arxiv.org/abs/1011.0686)
+
+2. [Learning to Reach Goals via Iterated Supervised Learning](https://arxiv.org/abs/1912.06088)
