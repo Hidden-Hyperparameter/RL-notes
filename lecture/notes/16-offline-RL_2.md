@@ -65,10 +65,16 @@ $$
 其中， $A(s,a)$ 可以是 $Q(s,a)$ 减去任何一个不依赖action的值。因此，我们可以修改训练目标，这一新的训练目标的最优值仍为 $\pi^{\star}$ ：
 
 $$
-L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A(s,a)}{\lambda}\right)\right]
+L_{\text{AWAC}}(\theta)=-\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(a|s))\cdot\dfrac{1}{Z(s)}\exp\left(\frac{A(s,a)}{\lambda}\right)\right]
 $$
 
-这一方法长得很像actor critic，但加了权，因此被称为**AWAC(Advantage-Weighted Actor-Critic)**，其中的 $\lambda$ 被称为**temperature**。 $\lambda$ 作为拉格朗日乘子，可以控制 $\pi$ 和 $\pi_\beta$ 的距离：当 $\lambda$ 趋于无穷，就变成了MLE training， $\pi$ 会趋向于 $\pi_\beta$ ；当 $\lambda$ 趋于0，就变成了policy gradient training， $\pi$ 会趋向于argmax policy。
+这一方法长得很像 behavior cloning 的 objective
+$$
+L_{BC}=\mathbb{E}_{s,a\sim \pi_\beta}\left[-\log \pi_\theta(a|s)\right],
+$$
+只不过对每个数据 $(s,a)$ 增加了一个权重。直观上说，这个方法实际上是一种 behavior cloning，但更注重学习那些 $A(s,a)$ 较大的 behavior——也就是更优秀的 behavior。因此，它被称为 **AWAC (Advantage-Weighted Actor-Critic)**。
+
+其中的 $\lambda$ 被称为 **temperature**。 $\lambda$ 作为拉格朗日乘子，可以控制 $\pi$ 和 $\pi_\beta$ 的距离：数学上，当 $\lambda$ 趋于无穷，就变成了 MLE training， $\pi$ 会趋向于 $\pi_\beta$ ；当 $\lambda$ 趋于 0，$\pi$ 会趋向于argmax policy。
 
 实验上，可以证明，这样的objective相比于原来的objective表现更好。（它们在理论上是等价的，但实际上因为神经网络表现力有限，就有了优劣之分。）
 
@@ -78,8 +84,8 @@ $$
 
 重复：
 
-1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ ；
-2. 使用 $L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_{\beta}}\left[(Q_\phi(s,a)-(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi_\theta(\cdot|s')}[Q_\phi(s',a')]))^2\right]$ 来训练 $\phi$ 。
+1. 使用 $L_{\text{AWAC}}(\theta)=-\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(a|s))\cdot\dfrac{1}{Z(s)}\exp\left(\dfrac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ ；
+2. 使用 $L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_{\beta}}\left[(Q_\phi(s,a)-(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi_\theta(\cdot|s')}[Q_\phi(s',a')]))^2\right]$ 来训练 $\phi$。（$L_Q$ 就是常规的 actor-critic loss）
 
 ## Improvement
 

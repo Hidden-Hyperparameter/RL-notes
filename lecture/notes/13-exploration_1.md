@@ -45,7 +45,7 @@ $$
 注意这个过程包含了我们试错的过程。等价地，我们也可以把这一目标写为**regret**的形式：
 
 $$
-\text{Reg}=T\cdot \mathbb{E}_{r\sim p(r|a_n)}[r]-\sum_{t=1}^T r(a_t)
+\text{Reg}=T\cdot \mathbb{E}_{r\sim p(r|a^\star)}[r]-\sum_{t=1}^T r(a_t)
 $$
 
 它代表了我们的模型和最优模型之间的差距。接下来，我们介绍三种方法，来最小化这一regret。
@@ -92,13 +92,15 @@ $$
 \text{IG}(a)=\mathcal{H}(\hat{p}({\theta}|h))-\mathbb{E}_{r\sim p(\cdot|a)}\left[\mathcal{H}(\hat{p}(\theta|h,a,r))\right]
 $$
 
-其中 $\mathcal{H}$ 代表分布的熵，而 $h$ 代表所有的历史， $\hat{p}(\theta|h)$ 和 $\hat{p}(\theta|h,a,r)$ 代表根据历史（后者比前者多一组数据）训练出的belief state分布。这一表达式的代表了选择action $a$ 之后增加的信息量（减少的不确定性）。最后，我们选取action的方式是，
+其中 $\mathcal{H}$ 代表分布的熵，而 $h$ 代表所有的历史， $\hat{p}(\theta|h)$ 和 $\hat{p}(\theta|h,a,r)$ 代表根据历史（后者比前者多一组数据）训练出的belief state分布。这一表达式的代表了选择action $a$ 之后增加的信息量（减少的不确定性）。
+
+在选择 action 的时候，要做到 exploitation 和 exploration 的平衡：前者体现在和每种 latent $\theta$ 的 optimal policy $a^\star_\theta$ 的差距
+$$\mathbb{E}_{\theta\sim p(\theta|h)} [r(a^\star_\theta)-r(a)],$$
+而后者体现在互信息 $\text{IG}(a)$。于是我们可以让
 
 $$
-a=\arg\min_a \frac{\left(r(a^{\star})-\mathbb{E}_{r\sim p(\cdot|a)}[r]\right)^2}{\text{IG}(a)}
+a=\arg\min_a \frac{(\mathbb{E}_{\theta\sim p(\theta|h)} [r(a^\star_\theta)-r(a)])^2}{\text{IG}(a)}.
 $$
-
-这一表达式中，分子代表不应该选取太差的策略（代表适度的exploitation）；而分母代表我们应该选取能够获得最多信息的策略（代表适度的exploration）。
 
 接下来，让我们把这些方法从multi-arm bandit的模型推广到更一般的RL问题中。
 
@@ -166,7 +168,7 @@ $$
 
 其中 $s$ 代表现在我们要计数的state。然后，我们用这个classifier $D_s$ 来输出 $D_s(s)$ 。
 
-乍一看，这没道理——这应该总是输出label “ $-$ ” 啊! 但是仔细想并不是这样：如果和 $s$ 类似的数据在 $\mathcal{D}_{s}^{(+)}$ 中出现过 $N(s)$ 次，那么大概会有
+乍一看，这没道理——这应该总是输出label “ $-$ ” 啊！但是仔细想并不是这样：假设模型具有较差的表达能力（可以通过 regularization 控制），那么会有很多和 $s$ 类似的 historical states 被 encode 到几乎相同的 embedding。如果和 $s$ 类似的数据在 $\mathcal{D}_{s}^{(+)}$ 中出现过 $N(s)$ 次，那么大概会有
 
 $$
 \Pr(D_s(s)=+)\approx \frac{N(s)}{N(s)+1}
@@ -186,9 +188,9 @@ $$
 
 还记得在DL中，我们说模型的generalization 问题：测试的数据和原始的数据集分布差距越大，模型的误差就越差。而我们现在刚好就是想判断一个state是否和历史上的数据相似。因此，我们可以用模型的误差来估计这一点。
 
-具体地，我们随便找一个比较feature的函数（也就是说它不能太简单） $f$ ，然后在见过的数据上面拟合一个模型 $f_\theta$ 。这样，我们只需要计算 $f_\theta$ 和 $f$ 的误差（比如mse loss），就可以估计这个state是否在历史上出现过。误差越大，奖励越高。这一方法也被称为**RND(Random Network Distillation)**。
+具体地，我们随便找一个比较feature的函数（也就是说它不能太简单） $f$ ，然后在见过的数据上面拟合一个模型 $f_\theta$ 。这样，我们只需要计算 $f_\theta$ 和 $f$ 的误差（比如mse loss），就可以估计这个state是否在历史上出现过。误差越大，说明这个数据与训练数据集分布差距越大，从而奖励越高。这一方法也被称为**RND(Random Network Distillation)**。
 
-当然，这个函数有时候并不是随机选取的。比如，可以刚好选取 $s'=f(s,a)$ ，这样看起来更靠谱。不过，具体细节肯定还是要在实验上探讨。
+如何选取这样的 $f$？有时候，人们就让它是 next state prediction，也就是说 $f(s,a)=s'$。还有一种巧妙的方式：我们根据模型架构**随机**选取一个参数 $\phi$，并让 $f=f_{\phi}$。不过，具体细节肯定还是要在实验上探讨。
 
 ## Thompson Sampling in Deep RL
 
@@ -270,7 +272,17 @@ $$
 \text{IG}(a)\approx \text{KL}(q(\theta|\phi')||q(\theta|\phi))
 $$
 
-其中 $\phi'$ 代表在加入 $(s,a,s')$ 这一组数据之后的新的参数。使用这个exploration bonus，再使用前面multi-arm bandit中的选择 $a$ 的策略，我们就可以成功地实现一个比较好的exploration。
+其中 $\phi'$ 代表在加入 $(s,a,s')$ 这一组数据之后的新的参数。
+
+我们可以考虑使用前面 Multi-arm bandit 的方法选择 $a$；但是考虑到此时的 latent $\theta$ 十分复杂，所以计算出每种情况的 $a^\star$ 也十分困难。
+
+但我们只需要把 $\text{IG}(a)$ 这个 bonus 加到 reward 里，就能自然地促进模型的 exploration: 
+$$r'\leftarrow r+\alpha\cdot \text{IG}(a)\approx r+\alpha\cdot \text{KL}(q(\theta|\phi')||q(\theta|\phi)).$$
+用 $r'$ 学习 policy $\pi$ 可以使用任何 RL method。
+
+顺带一提，训练 Bayesian network 的 loss 是
+$$\mathcal{L}_{\text{Bayesian}}=\text{KL}(q(\theta|\phi)||p(\theta))-\mathbb{E}_{\theta\sim q(\cdot|\phi)}(\log p(\mathcal{D}|\theta)),$$
+其中 $\mathcal{D}$ 是 replay buffer 中随机 sample 的数据。第一项希望 $q(\theta|\phi)$ 尽量靠近 prior distribution；第二项则是要求 $\theta$ 正确地描述这个 environment。
 
 上面的算法也被称为VIME（Variational Information Maximization Exploration）。它在数学上十分强大，但需要的算力也很巨大，因为每一步都需要训练一个贝叶斯网络。
 

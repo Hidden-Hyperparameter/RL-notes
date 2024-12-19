@@ -37,7 +37,9 @@
 
 > 这里也有一个side question：人们其实一直不知道，为什么DL的模型不会严重地overfit？因为DL的模型参数远多于数据量，按道理应该具有在训练数据集上很快overfit的能力。
 >
-> 没有人知道为什么；但可以想到，这等效的代表着，巨大的神经网络结合上SGD，可以起到某种魔法般的“约束”的作用。那么，我们能否理解这样的“魔法”，并把它应用到RL里面，使得训练更加稳定？比如，如果我们把神经网络变得特别大，是否会有帮助？这些都是open question，等待着人们的解答。
+> 有人说是因为模型的 inductive bias；但也没有人能在这上面明确的理解为什么。但可以想到，这等效的代表着，巨大的神经网络结合上SGD，可以起到某种魔法般的“约束”的作用。
+>
+> 那么，我们能否理解这样的“魔法”，并把它应用到RL里面，使得训练更加稳定？比如，如果我们把神经网络变得特别大，是否会有帮助？在自然语言处理领域，人们发现 Transformer 模型的参数量越大，能力就越强，完全看不到边界——这就是所谓的 **scaling law**。那么，在 RL 领域，是否存在这样的 scaling law 呢？什么样的模型能够做到呢？这些都是 open question，等待着人们的解答。
 
 ## Sample Efficiency
 
@@ -75,7 +77,13 @@
 
 ## About Assumptions: How Humans Get Involved?
 
-我们再来讨论如何人类介入RL的问题。对于**reward**这一介入方式，我们已经有了很多的研究。但是我们也清楚，很多东西无法定义reward。比如，试着给“把水倒进杯子里”定义reward？除非你描述每一个水分子的位置，否则基本是不可能的。
+我们再来讨论如何人类介入RL的问题。对于**reward**这一介入方式，我们已经有了很多的研究。但是我们也清楚，很多 human preference 无法用单一的 reward 来刻画。
+
+> **Condorcet paradox**: 假设三个人的 preference 分别是 $A<B<C$, $B<C<A$, $C<A<B$，那么就会出现：
+>
+> 在 $A,B$ 面前，更多人选择 $B$;     
+> 在 $B,C$ 面前，更多人选择 $C$;     
+> 在 $C,A$ 面前，更多人选择 $A$。
 
 除了reward之外，demo是一个很好的方法。不仅是behavior cloning，我们甚至还可以通过某些方式像“老师教学生”一样，让人类教agent一些关键技巧，再令agent进行应用。比如，[这篇论文](http://www.jenskober.de/publications/Muelling2012AAAI.pdf)就用此方法让机器人学会打乒乓球。
 
@@ -85,7 +93,7 @@
 
 这也启示我们：RL的研究并不只是局限在最原始的问题的解决算法上；一个很重要的方向就是，如何提出一个新的问题陈述，使得它和实际更加贴近，更加有意义。
 
-## Philosophy: What is Reinfocement Learning, anyway?
+## Philosophy: What is Reinforcement Learning, anyway?
 
 我们当然知道什么**是** RL。但是，RL**对于我们**是什么东西？
 - 它仅仅是一种我们用来解决问题的**工具**，就像计算机、数学和物理一样？

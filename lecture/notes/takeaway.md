@@ -408,7 +408,7 @@ $$
 
 重复：
 
-1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ ；
+1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\dfrac{1}{Z(s)}\exp\left(\dfrac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ ；
 2. 使用 $L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_{\beta}}\left[(Q_\phi(s,a)-(r(s,a)+\gamma \mathbb{E}_{a'\sim \pi_\theta(\cdot|s')}[Q_\phi(s',a')]))^2\right]$ 来训练 $\phi$ 。
 
 **IQL Algorithm**
@@ -418,7 +418,7 @@ $$
     2. 使用 $L_Q(\phi)=\mathbb{E}_{s,a,s'\sim \pi_\beta}\left[(Q_\phi(s,a)-(r(s,a)+\gamma V_\psi(s')))^2\right]$ 来训练 $\phi$ ；
 
 2. 最后（在eval时）：
-    1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\exp\left(\frac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ 。
+    1. 使用 $L_{\text{AWAC}}(\theta)=\mathbb{E}_{s,a\sim \pi_\beta}\left[(\log \pi_\theta(s|a))\cdot\dfrac{1}{Z(s)}\exp\left(\dfrac{A_{\phi}(s,a)}{\lambda}\right)\right]$ 来训练 $\theta$ 。
 
 **CQL Algorithm**
 

@@ -5,8 +5,12 @@
 我们重新考虑之前的考虑causality的 policy gradient的表达式：
 
 $$
-\nabla_\theta J(\theta)=\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\sum_{t=1}^T\left(\nabla_{\theta}\log \pi_\theta(a_t|s_t)\sum_{t'=t}^Tr(s_{t'},a_{t'})\right)\right]=\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\sum_{t=1}^T\nabla_{\theta}\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
+\nabla_\theta J(\theta)=\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\sum_{t=1}^T\left(\nabla_{\theta}\log \pi_\theta(a_t|s_t)\sum_{t'=t}^Tr(s_{t'},a_{t'})\right)\right]
+$$
+$$
+=\mathbb{E}_{\tau \sim p_{\bar{\theta}}(\tau)}\left[\sum_{t=1}^T\nabla_{\theta}\log \pi_\theta(a_t|s_t)\hat{Q}^{\pi_\theta}_{n,t}
 \right]
+
 $$
 
 但这个表达式具有比较大的variance。仔细一想，是因为对于每一次 $\hat{Q}^{\pi_\theta}_{n,t}$ 我们只计算一条轨迹，这会导致variance很大。请记住本讲的takeover：
@@ -176,9 +180,7 @@ $$
 A^{\pi_\theta}(s_t,a_t)=Q^{\pi_\theta}(s_t,a_t)-V^{\pi_\theta}_\phi(s_t)=r(s_t,a_t)+\gamma V^{\pi_\theta}_\phi(s_{t+1})-V^{\pi_\theta}_\phi(s_t)
 $$
 
-## Two Kinds of Discount Factor (Optional)
-
-**Warning.** 如果已经感觉有点晕了，千万别看这一节。
+## Two Kinds of Discount Factor
 
 我们回顾第一次引入discount factor的表达式
 
@@ -412,11 +414,7 @@ $$
 \nabla_\theta J(\theta)=\mathbb{E}_{\tau\sim p_\theta(\tau)}\left[\sum_{t=1}^T \nabla_{\theta}\log \pi_\theta(a_t|s_t)\left[\left(\sum_{t'=t}^{t+n-1} \gamma^{t'-t} r(s_{t'},a_{t'})\right)+\gamma^n V_\phi^{\pi_\theta}(s_{t+n})-V^{\pi_\theta}_\phi(s_t)\right]\right]
 $$
 
-这个方法被称为N-step returns。它为什么合理呢？我们看到，对于较近的决策（ $t'\approx t$ ），即使是单次采样方差也不会太大，并且避免了bias；而对于远处的决策，我们使用模型的预测结果以避免采样。
-
-> Q: 直观上，为什么较近的决策方差小？
->
-> A: 不妨带入我们的人生。如果考虑你明天会做什么，多少可以通过你现在的计划或者他人（环境）的事情安排决定下来；但倘若问到二十年后你会做什么，那又有谁真正能确定呢？
+这个方法被称为 N-step returns。它为什么合理呢？我们看到，对于较近的决策（ $t'\approx t$ ），单次采样方差相对较小，并且避免了 bias；而对于远处的决策，我们使用模型的预测结果以减少方差。
 
 ## Generalized Advantage Estimation
 

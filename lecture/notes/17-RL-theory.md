@@ -26,7 +26,7 @@
 
 更加specific地，我们一般研究两种问题：
 
-- exploration：给定某个exploration方法，我们能否保证在 $|S|,|A|,T=\frac{1}{\gamma}$ 的**多项式**次和环境的交互后，到达某种几乎访问了所有有意义的(state,action)对的状态？
+- exploration：给定某个exploration方法，我们能否保证在 $|S|,|A|,T=\frac{1}{1-\gamma}$ 的**多项式**次和环境的交互后，到达某种几乎访问了所有有意义的(state,action)对的状态？
 - policy learning：假设我们可以完全explore，那么学到的policy在真实的环境中表现如何？    
     - 这里，“完全explore”就是一种strong assumption，有几种阐述：
         - 有一个oracle，可以告诉我们任何一个(state,action)对的下一个state的概率分布；

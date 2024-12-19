@@ -128,14 +128,14 @@ Q learning是Q iteration的online版本。具体地，我们每一次和环境�
 
 重复：
 1. 从环境中根据某种policy采样一个 $(s,a,s',r)$ ；
-2. 计算**一个** $[Q^\pi(s,a)]^\star=r(s,a)+\gamma\max_{a'}Q^{\pi}_\phi(s',a')$
+2. 计算**一个** $[Q^\pi(s,a)]^\star=r(s,a)+\gamma\max_{a'}Q^{\pi}_\phi(s',a')$ (stop gradient)
 3. 对 $L=([Q^\pi(s,a)]^\star-Q^{\pi}_\phi(s,a))^2$ 作**一步**梯度下降。
 
 其中第二步的“一个”是为了保证它是一个online的算法。而第三步之所以只作一个gradient step，是因为我们的训练数据只有一个（也就是刚采样的那个数据）。
 
-另外值得一提的是第一步采样的policy。就如之前所说，因为off-policy的性质，这里采样的“某种policy”并不一定是当前 $Q$ 值分布下的最佳policy；但从另一个角度来看，直觉上这个policy多少应该贴近现在的最优policy，这样有利于模型“加强训练”。但除此之外，我们必须注意policy需要有一个exploration的机制，否则我们可能会陷入一个很差的解。
+另外值得一提的是第一步采样的 policy。就如之前所说，因为 off-policy 的性质，这一步使用的 policy 并不一定是当前 $Q$ 值分布下的最佳 policy，而可以是任意的。事实上，我们仍然希望它接近目前看来的“最优解”：因为准确的 $Q^\pi_\phi$ 更需要最优决策的 $Q$ 准确。
 
-这一切都使得**Q learning中的exploration**成为一个非常重要的问题。我们将在之后的某讲讨论这个问题。但在现在，可以根据intuition给出一些介绍：
+然而，如果只探索最优解，模型很容易陷入局部极小值。例如，存在一个操作的 reward 是 +10，其余操作会获得稳定的 +1 收入，然而模型第一步探索到了 +1，根据“最优决策”，它就会陷入这个决策不再改变。这表明 Q learning 中的 **exploration** 成为一个非常重要的问题。我们将在之后的某讲讨论这个问题。但在现在，可以根据intuition给出一些介绍：
 
 - **$\epsilon$ -greedy**：以 $1-\epsilon$ 的概率选择最优的action，以 $\epsilon$ 的概率随机选择其他的一个action；
 - **Boltzmann**： $\pi(a|s)=\frac{1}{Z}e^{Q(s,a)/\tau}$ 。注意这个方法相比于 $\epsilon$ -greedy的合理性：
@@ -150,13 +150,9 @@ Q learning是Q iteration的online版本。具体地，我们每一次和环境�
 
 如果你仔细观察上面vanilla Q learning的算法，那么很大概率你会觉得这个算法有着巨大的不合理之处。
 
-首先，Q learning是每一次训练的数据都是和环境交互的最新结果（换句话说，在同一条trajectory上面）。这就造成问题了：如果考虑Q learning的连续几步gradient step，那么就会发现，它的训练数据是**相关**的。这会导致Q learning的收敛性变得很难保证。
+考虑 online Q Learning, 每一次训练的数据都是 sequential 的，意味这它们之前有很强的**相关性 (correlation)**，直觉上会造成很大的 bias。这会导致 Q learning 的更难收敛。
 
-不仅如此，每一步的gradient step都伴随着一个value的update，这就使得它的训练目标是“移动的”，这也会导致收敛性的问题。
-
-举一个不恰当的例子：比如我们训练MNIST的分类模型，上来给你一张图片label是1；接下来，只让你做一步gradient step，然后立刻把这张图片（比如说）加一点噪声或者扭转一下（强相关性），然后把label改成2。这样要是能收敛，那就是奇迹了。
-
-因此，这个简单的版本理论上存在很大的缺陷。我们需要想办法让它work。
+不仅如此，每一次 gradient step 都伴随着一个 value 的 update，这就使得它的训练目标 $r+\gamma \max Q$ 一直在变化，进一步导致训练不稳定。
 
 ## Avoid Correlation
 
@@ -284,7 +280,7 @@ while True:
 
 容易看出， $K$ 越大这个回归的过程越稳定。但实际上，我们一般取 $K=1$ ，这样使得算法更加online一些。
 
-另外，容易看到， $K=1$ 的时候这个算法比起前面最开始提出的Q learning with replay buffer来的优势就是 $\phi_0$ 的update慢了 $N$ 倍。这样的做法才保证了我们的网络能够跟上Q function的update进度。
+另外，容易看到， $K=1$ 的时候这个算法比起前面最开始提出的Q learning with replay buffer的优势就是 $\phi_0$ 的update慢了 $N$ 倍。这样的做法才保证了我们的网络能够跟上Q function的update进度。
 
 ### Modification: Alternative Target network
 
