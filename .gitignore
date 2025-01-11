@@ -5,3 +5,4 @@ written_hw
 lecture/notes/*.txt
 
 tutorials/backups/*
+.DS_Store
