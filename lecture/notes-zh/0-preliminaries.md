@@ -5,7 +5,7 @@
 在全部笔记完工一个月后，我再次阅读之前的笔记时，发现存在着很多地方逻辑转折不是十分通顺。在修改原来笔记的同时，我也正在尝试建立一个更加自然的体系，这一体系放在[tutorials](/tutorials)文件夹下。如果感兴趣也可以参考一下。
 
 我的目标是，建立两个平行（虽然内容可能有很大公共部分，但是阅读起来完全独立）的两个体系：
-- （很早就建立的）[笔记](/lecture/notes)
+- （很早就建立的）[笔记](/lecture/notes-zh)
     - 特点是紧贴CS285课程的内容，以CS285的一讲为一个单位；
 - 最近实验性质，处于开发阶段的[tutorial](/tutorials)
     - 特点是更加自然的体系，更加适合初学者理解。同时，包含大量的代码实现。
@@ -18,9 +18,9 @@ Tutorial由若干个ipynb组成。同时，这里的介绍顺序按照逻辑重�
 
 “笔记”部分基本可以说包含了PPT和讲课上的大部分内容，也成一个体系。我个人所希望的也是，经过我们大家一起合作，仅参考“笔记”就可以完成CS285的学习，比听课更加快速，又比单纯看PPT更为轻松。（我自己听了课，因此教授讲的而PPT上面没有的一些内容我也记录上来了）
 
-笔记文件可以在[这里](/lecture/notes)找到（为了最好的阅读体验，建议下载仓库并用VS code阅读。如果在Github上面阅读，请不要点击这个link，而是点击下面Table of Contents的link）。
+笔记文件可以在[这里](/lecture/notes-zh)找到（为了最好的阅读体验，建议下载仓库并用VS code阅读。如果在Github上面阅读，请不要点击这个link，而是点击下面Table of Contents的link）。
 
-本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](/lecture/notes/takeaway.md)总结了所有讲的要点，类似于一个“cheatsheet”。在每一讲的最后，可能会有一个"Reference Papers"板块，它介绍了一些在笔记内容之外的，更加advanced的话题的参考来源。每篇论文后有一个简述，但因为我~~事实上都没读过~~不太了解，所以不一定靠谱，仅供参考。
+本笔记的架构：每一讲有一个单独的笔记。此外，[takeaway](/lecture/notes-zh/takeaway.md)总结了所有讲的要点，类似于一个“cheatsheet”。在每一讲的最后，可能会有一个"Reference Papers"板块，它介绍了一些在笔记内容之外的，更加advanced的话题的参考来源。每篇论文后有一个简述，但因为我~~事实上都没读过~~不太了解，所以不一定靠谱，仅供参考。
 
 此外，如果有些笔记引用了作业的内容，你可以在[这里](https://github.com/Hidden-Hyperparameter/CS285_homework)找到。这就是CS285这一课程本身的作业。
 
@@ -36,32 +36,32 @@ Tutorial由若干个ipynb组成。同时，这里的介绍顺序按照逻辑重�
 
 这里是笔记的目录，和Tutorial无关。
 
-Takeaway/Cheatsheet: [Here](/lecture/notes/takeaway.md)
+Takeaway/Cheatsheet: [Here](/lecture/notes-zh/takeaway.md)
 
 0. Preliminaries (just this file)
 1. What is RL (not implemented)
-2. Imitation Learning [Here](/lecture/notes/2-imitation_learning.md)
-3. Pytorch Basics [(Not complete)](/lecture/notes/3-pytorch.md)
-4. Introduction to RL [Here](/lecture/notes/4-intro2RL.md)
-5. Policy Gradients [Here](/lecture/notes/5-policy_grad.md)
-6. Actor Critic Algorithms [Here](/lecture/notes/6-actor-critic.md)
-7. Value Function Methods [Here](/lecture/notes/7-value_func.md)
-8. Q Learning (advanced) [Here](/lecture/notes/8-Q_learning.md)
-9. Advanced Policy Gradients [Here](/lecture/notes/9-advanced_policy_grad.md)
-10. Optimal Control and Planning [Here](/lecture/notes/10-optimal_control_planning.md)
-11. Model-based RL [Here](/lecture/notes/11-model-based.md)
-12. Model-based RL with a Policy [Here](/lecture/notes/12-model-based-with-policy.md)
-13. Exploration (1) [Here](/lecture/notes/13-exploration_1.md)
-14. Exploration (2) [Here](/lecture/notes/14-exploration_2.md)
-15. Offline RL (1) [Here](/lecture/notes/15-offline-RL_1.md)
-16. Offline RL (2) [Here](/lecture/notes/16-offline-RL_2.md)
-17. RL Theory [Here](/lecture/notes/17-RL-theory.md)
-18. Variational AutoEncoder [Here](/lecture/notes/18-vae.md)
-19. Soft Optimality [Here](/lecture/notes/19-soft-optimality.md)
-20. Inverse RL [Here](/lecture/notes/20-IRL.md)
-21. RL and Language Models [Here](/lecture/notes/21-RL-LM.md)
-22. Transfer Learning and Meta Learning [Here](/lecture/notes/22-transfer-meta.md)
-23. Challenges & Open Problems [Here](/lecture/notes/23-challenge.md)
+2. Imitation Learning [Here](/lecture/notes-zh/2-imitation_learning.md)
+3. Pytorch Basics [(Not complete)](/lecture/notes-zh/3-pytorch.md)
+4. Introduction to RL [Here](/lecture/notes-zh/4-intro2RL.md)
+5. Policy Gradients [Here](/lecture/notes-zh/5-policy_grad.md)
+6. Actor Critic Algorithms [Here](/lecture/notes-zh/6-actor-critic.md)
+7. Value Function Methods [Here](/lecture/notes-zh/7-value_func.md)
+8. Q Learning (advanced) [Here](/lecture/notes-zh/8-Q_learning.md)
+9. Advanced Policy Gradients [Here](/lecture/notes-zh/9-advanced_policy_grad.md)
+10. Optimal Control and Planning [Here](/lecture/notes-zh/10-optimal_control_planning.md)
+11. Model-based RL [Here](/lecture/notes-zh/11-model-based.md)
+12. Model-based RL with a Policy [Here](/lecture/notes-zh/12-model-based-with-policy.md)
+13. Exploration (1) [Here](/lecture/notes-zh/13-exploration_1.md)
+14. Exploration (2) [Here](/lecture/notes-zh/14-exploration_2.md)
+15. Offline RL (1) [Here](/lecture/notes-zh/15-offline-RL_1.md)
+16. Offline RL (2) [Here](/lecture/notes-zh/16-offline-RL_2.md)
+17. RL Theory [Here](/lecture/notes-zh/17-RL-theory.md)
+18. Variational AutoEncoder [Here](/lecture/notes-zh/18-vae.md)
+19. Soft Optimality [Here](/lecture/notes-zh/19-soft-optimality.md)
+20. Inverse RL [Here](/lecture/notes-zh/20-IRL.md)
+21. RL and Language Models [Here](/lecture/notes-zh/21-RL-LM.md)
+22. Transfer Learning and Meta Learning [Here](/lecture/notes-zh/22-transfer-meta.md)
+23. Challenges & Open Problems [Here](/lecture/notes-zh/23-challenge.md)
 
 
 # Preliminaries
@@ -136,7 +136,7 @@ RL和DL有什么区别呢？当然，我们知道，RL和环境有关，也有�
 - 而RL所做的是**决策**，这件事情**没有标准答案**。我们也已经看到，agent的目的是最大化cumulative reward。如何能最大化这一reward呢？每一步又该take什么action呢？这不仅没有答案，甚至在理论上都不一定是唯一的。人们夸赞RL agent，夸赞它们作出的举动是如此的“新颖”，与普通人的方法完全不同，甚至于超越了人类的认知。
     - 比如，在当年AlphaGo战胜李世石的时候，agent给出了著名的"Move 37"，当时所有的围棋专家都无法理解这一步的意义，这就是RL的魅力所在。
 
-当然，从目标上来看，还有一个更为重要的区别：**generalization**。我们在这里暂且不描述，当我们去实践RL的具体任务的时候，我们就会真正体会到它们的差异。（如果你很好奇，可以直接去看看最后一讲的[总结](./23-challenge.md#generalization)）
+当然，从目标上来看，还有一个更为重要的区别：**generalization**。我们在这里暂且不描述，当我们去实践RL的具体任务的时候，我们就会真正体会到它们的差异。（如果你很好奇，可以直接去看看最后一讲的[总结](/lecture/notes-zh/23-challenge.md#generalization)）
 
 ## From the process
 
@@ -161,4 +161,4 @@ RL和DL有什么区别呢？当然，我们知道，RL和环境有关，也有�
 
 直观上，把RL搞得Deep一些肯定是有益无害；但事实上有很subtle的事情会发生。我们会在后面的笔记中进一步讨论这一点。
 
-# Anyway... Let's get [started](/lecture/notes/2-imitation_learning.md)!
+# Anyway... Let's get [started](/lecture/notes-zh/2-imitation_learning.md)!
